@@ -6,7 +6,7 @@
 
 | Id | name | mail | things | used|
 | --- | --- | --- | --- | --- |   
-| 1   | brekilunux| breaklinux@163lcom |     |     |
+| 1   | breaklinux| breaklinux@163lcom |     |     |
 |     |           |           |        |     |
 |     |           |           |        |     |
 |     |           |           |        |     |
