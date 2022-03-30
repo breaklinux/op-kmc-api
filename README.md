@@ -27,11 +27,114 @@
 - 11.支持设置污点容忍和node标签指定调度.
 - 12.发布人员进行关联 发布统计.参考月,周.日等纬度进行统计发布次数成功率. 
 
-# 对接前端统一接口返回参数
+# 对接前端统一标准接口参数
+
+**op-kmc-api 接口文档：** 
+示例
+
+-  LDAP登录验证接口
+
+**请求URL：** 
+- ` http://devops-op-kmc-api.com/api/v1/login`
+  
+**请求方式：**
+- POST  
+
+**格式：**  
+- JSON  
+
+**参数：** 
+
+|参数   |必填   |类型   |说明   |
+| ------------  | ------------ | ------------ | ------------ |
+| username    |是   |str   |登录用户只支持单个LDAP用户名称
+| password    |是   |str   |登录密码只支持单个LDAP用户密码
+| type        |是   |str   |账号类型 默认值:ldap 或者 标准standard
 
 
+ **请求示例**
+```
+{
+	 "username":"ops",
+	 "password":"123456789",
+	 "type": "ldap"
+}
+```
+ **标准正常返回参数**
+```
+{
+   {
+    "code": 0,
+    "message": "登录正常",
+    "data": {
+        "token":"eyJhbGciOiJIUzI1NiIsInR5cCIU2cem9iZa2DVYNbTnL7u91Mpxxxx", #账号验证通过生成token 
+        "state": true
+    }
+}
+}
+```
+**标准错误返回参数**
+```
+{
+   "code": 1,
+   "message": "LDAP系统验证账号密码失败",
+   "data": {  
+        "token": "", 
+        "state": false
+    }
+}
+```
 
+ **备注** 
 
+- code状态码描述
+  0 表示系统正常响应;
+  1 表示系统内部出现问题;  
+
+标准接口格式
+```
+{
+  "code": 0 0或者1 固定
+  "message": "业务消息"
+  "data": {
+   "自定义key": "自定义value"
+   }
+}
+```
+# 接口格式统一Result API 标准
+
+ 1.统一JSON数据格式返回:
+    GET  查询资源 参数放在: Query Params key=value 查询
+    POST 新增资源 参数放在body体中 
+    PUT  更新资源 参数放在body体中带上资源id 和更新字段
+    DELETE 删除资源 参数放在body体中 带上资源id 
+
+    
+# 接口安全
+
+ 1. 全部访问任何系统API资源都需要在 HTTP 中 Headers 携带token进行验证 除了LDAP用户认证生成token接口
+ CURL 格式如下
+ ```
+curl --location --request GET 'https://devops-op-kmc-api.com/api/v1/getPods?page=1&page_size=10' \
+--header 'Authorization: Bearer Basic xxxxGZnI3JkSWZYRDZab1o3YUJOdlk=' \
+--data-raw ''
+ 
+ ```
+ 
+2. python 示例代码 方式
+```
+import requests
+
+url = "https://devops-op-kmc-api.com/api/v1/?page=1&page_size=10"
+
+payload = ""
+headers = {
+  'Authorization': 'Bearer Basic xxxxGZnI3JkSWZYRDZab1o3YUJOdlk='
+}
+
+response = requests.request("GET", url, headers=headers, data=payload)
+print(response.text)
+```
 
 
 
