@@ -4,7 +4,7 @@
 
 # Contributing code person (贡献代码人员)
 
-| Id | name | mail |  |things |
+| Id | name | mail | things | used|
 | --- | --- | --- | --- | --- |   
 | 1   | brekilunux| breaklinux@163lcom |     |     |
 |     |           |           |        |     |
