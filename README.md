@@ -113,9 +113,11 @@
 ```
     
 # 接口安全
-
+```
  1. 全部访问任何系统API资源都需要在 HTTP 中 Headers 携带token进行验证 除了LDAP用户认证生成token接口
- CURL 格式如下
+```
+
+2.  CURL 格式如下
  ```
 curl --location --request GET 'https://devops-op-kmc-api.com/api/v1/getPods?page=1&page_size=10' \
 --header 'Authorization: Bearer Basic xxxxGZnI3JkSWZYRDZab1o3YUJOdlk=' \
@@ -123,7 +125,7 @@ curl --location --request GET 'https://devops-op-kmc-api.com/api/v1/getPods?page
  
  ```
  
-2. python 示例代码 方式
+3. python 示例代码 方式
 ```
 import requests
 
