@@ -102,6 +102,7 @@
 }
 ```
 # 接口格式统一Result API 标准
+```
 
  1.统一JSON数据格式返回:
     GET  查询资源 参数放在: Query Params key=value 查询
@@ -109,6 +110,7 @@
     PUT  更新资源 参数放在body体中带上资源id 和更新字段
     DELETE 删除资源 参数放在body体中 带上资源id 
 
+```
     
 # 接口安全
 
