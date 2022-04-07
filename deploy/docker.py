@@ -2,7 +2,7 @@
 
 #安装依赖包
 def dependentPackages():
-    cmd="sudo yum -y install yum-utils device-mapper-persistent-data lvm2"
+    cmd="sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf && sudo sed -i 's/plugins=1/plugins=0/g' /etc/yum.conf && sudo yum -y install yum-utils device-mapper-persistent-data lvm2 && sudo yum clean all "
     return cmd
 
 #设置阿里云repo仓库
@@ -12,7 +12,7 @@ def aliDockerMirror():
 
 #安装docker服务
 def yumDocker():
-    cmd="sudo yum update -y && sudo yum install -y docker-ce"
+    cmd="yum -y update;sudo yum -y install docker-ce"
     return cmd
 
 #配置daemon(需要传递日志容量及仓库地址)
@@ -22,12 +22,9 @@ def daemon(logsize,registries):
     sudo mkdir -p /etc/systemd/system/docker.service.d;
     sudo cat > /etc/docker/daemon.json << EOF
 {
-    #文件驱动，使用systemd进行文件隔离
     "exec-opts": ["native.cgroupdriver=systemd"],
-    #日志机制
     "log-driver": "json-file",
     "log-opts":{
-        #日志最大容量
         "max-size": "'''+str(logsize)+'''"
     },
     "insecure-registries": ["'''+str(registries)+'''"] 
@@ -38,14 +35,14 @@ EOF
 
 #服务重新加载
 def reload():
-    cmd="sudo systemctl daemon-reload && sudo systemctl restart docker && sudo systemctl enable docker"
+    cmd="sudo systemctl daemon-reload;sudo systemctl restart docker;sudo systemctl enable docker"
     return cmd
 
 def deployDocker(logsize,registries):
     cmd=[]
     cmd.append(dependentPackages())
     cmd.append(aliDockerMirror())
-    cmd.append(yumDocker)
+    cmd.append(yumDocker())
     cmd.append(daemon(logsize,registries))
     cmd.append(reload())
     return cmd

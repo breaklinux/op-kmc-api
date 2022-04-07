@@ -3,7 +3,7 @@ import csv
 
 #安装kubelet、kubeadm
 def yumKube():
-    cmd="yum install -y kubelet-1.23.5-0 kubeadm-1.23.5-0;systemctl enable kubelet.service"
+    cmd="sudo yum install -y kubelet-1.23.5-0 kubeadm-1.23.5-0;systemctl enable kubelet.service"
     return cmd
 
 #把获取到的Token执行加入k8s集群(需要参数deploy:2)

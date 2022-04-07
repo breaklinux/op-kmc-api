@@ -4,8 +4,8 @@
 def df(ssh_client):
     cmd1="df -hT | awk '{print $NF,$(NF-1)}' | sed '1d' |awk '{print $1}'" #获取硬盘占用率
     cmd2="df -hT | awk '{print $NF,$(NF-1)}' | sed '1d' |awk '{print $2}'" #获取磁盘名称
-    stdin, dfout, stderr = ssh_client.exec_command(cmd1)
-    stdin, useout, stderr = ssh_client.exec_command(cmd2)
+    stdin, dfout, stderr = ssh_client.exec_command(cmd1,get_pty=True)
+    stdin, useout, stderr = ssh_client.exec_command(cmd2,get_pty=True)
     dflist = []
     uselist = []
     info = {}
@@ -22,7 +22,7 @@ def df(ssh_client):
 #内存
 def mem(ssh_client):
     cmd="free -t | awk 'NR == 2 {print $3/$2*100}'"    #获取内存占用率
-    stdin, useout, stderr = ssh_client.exec_command(cmd)
+    stdin, useout, stderr = ssh_client.exec_command(cmd,get_pty=True)
     info = {}
     for usage in useout:
         info["usage"] = usage
@@ -33,7 +33,7 @@ def mem(ssh_client):
 #cpu
 def cpu(ssh_client):
     cmd="top -b -n1 | fgrep \"Cpu(s)\" | tail -1 | awk -F'id,' '{split($1, vs, \",\"); v=vs[length(vs)]; sub(/\s+/, \"\", v);sub(/\s+/, \"\", v); printf \"%s\n\", 100-v; }'"
-    stdin, useout, stderr = ssh_client.exec_command(cmd)
+    stdin, useout, stderr = ssh_client.exec_command(cmd,get_pty=True)
     info = {}
     for usage in useout:
         info["usage"] = usage

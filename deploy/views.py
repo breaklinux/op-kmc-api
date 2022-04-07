@@ -1,16 +1,14 @@
 from deploy import base,docker,master,node,server_resource
-import paramiko
+import paramiko,json
+
 
 def sshCmd(ssh_client,c):
     print("执行命令:{0}".format(c))
-    stdin, stdout, stderr = ssh_client.exec_command(c)
-    for o in stdout:
-        print("命令执行结果："+str(o))
-        return o
+    stdin, stdout, stderr = ssh_client.exec_command(c,get_pty=True)
+    if not stdout is None:
+        return stdout.read()
     if not stderr is None:
-        for e in stderr:
-            print("命令执行结果：" + str(e))
-            return e
+        return stderr.read()
 
 #配置ssh登录linux客户端
 def sshLinux(host,port,username,password,hostname,ip,logsize,registries,deploy):
@@ -20,24 +18,29 @@ def sshLinux(host,port,username,password,hostname,ip,logsize,registries,deploy):
     if deploy == 1 or deploy == 2 or deploy == 3:
         #基础配置(1、2、3都走)
         print("系统基本配置及参数优化中......")
+        base.saveFile(hostname, ip)
         cmd=base.deployBase(hostname,ip)
         for c in cmd:
-            sshCmd(ssh_client,c)
+            o = sshCmd(ssh_client,c)
+            print("命令执行结果：" + str(o))
 
         #docker安装(1、2、3都走)
         print("docker环境部署中......")
         cmd=docker.deployDocker(logsize,registries)
         for c in cmd:
-            sshCmd(ssh_client,c)
+            o = sshCmd(ssh_client,c)
+            print("命令执行结果：" + str(o))
 
         # 安装master(deploy：1为需要init，deploy：2为加入master节点)
-        print("master环境部署中......")
         if deploy == 1 or deploy ==2:
+            print("master环境部署中......")
             cmd=master.yumKube()  #部署
-            sshCmd(ssh_client, cmd)
+            o = sshCmd(ssh_client, cmd)
+            print("命令执行结果：" + str(o))
             if deploy == 1:
                 cmd = master.kubeInit(ip)  #初始化
-                sshCmd(ssh_client,cmd)
+                o = sshCmd(ssh_client,cmd)
+                print("命令执行结果：" + str(o))
                 cmd = master.joinToken()   #获取jointoken命令
                 out = sshCmd(ssh_client,cmd)
             elif deploy == 2:
@@ -49,16 +52,18 @@ def sshLinux(host,port,username,password,hostname,ip,logsize,registries,deploy):
             cmd_list.append(master.kubectlPermission())   #配置kubectl
             cmd_list.append(master.flannel())  #配置flannel
             for c in cmd_list:
-                sshCmd(ssh_client, c)
+                o = sshCmd(ssh_client, c)
+                print("命令执行结果：" + str(o))
 
         # 安装node(deploy：3为node节点)
-        print("node环境部署中......")
         if deploy == 3:
+            print("node环境部署中......")
             cmd_list=[]
             cmd_list.append(node.yumKube())
             cmd_list.append(node.joinMasterCluster())
             for c in cmd_list:
-                sshCmd(ssh_client,c)
+                o = sshCmd(ssh_client,c)
+                print("命令执行结果：" + str(o))
 
     #服务器基本信息返回
     print("返回服务基本信息")
@@ -74,13 +79,14 @@ def sshLinux(host,port,username,password,hostname,ip,logsize,registries,deploy):
 
 def sshDeploy(request):
     if request.method == "POST":
-       host = request.POST.get('host')
-       port = request.POST.get('port')
-       username = request.POST.get('username')
-       password = request.POST.get('password')
-       hostname = request.POST.get('hostname')
-       ip = request.POST.get('ip')
-       logsize = request.POST.get('logsize')
-       registries = request.POST.get('registries')
-       deploy = request.POST.get('deploy')
-       sshLinux(host, port, username, password, hostname, ip, logsize, registries, deploy)
+        data = json.loads(request.body)
+        host = data.get('host')
+        port = data.get('port')
+        username = data.get('username')
+        password = data.get('password')
+        hostname = data.get('hostname')
+        ip = data.get('ip')
+        logsize = data.get('logsize')
+        registries = data.get('registries')
+        deploy = data.get('deploy')
+        sshLinux(host, port, username, password, hostname, ip, logsize, registries, deploy)

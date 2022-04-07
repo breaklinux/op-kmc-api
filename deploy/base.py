@@ -32,20 +32,27 @@ def setHost(hostname):
 
 #获取主机名及IP地址，存入到文本
 def saveFile(hostname,ip):
-    with open('./hosts.csv', 'a+',newline='',encoding='utf-8') as out:
-        csv_reader=csv.reader(out)
-        for i in csv_reader:
-            if hostname == i[0] or ip == i[1]:
-                return 1
-            else:
-                csv_write = csv.writer(out, dialect='excel')
-                dataList = [hostname,ip]
-                csv_write.writerow(dataList)
+    try:
+        with open('hosts.csv', 'r+',newline='',encoding='utf-8') as out:
+            csv_reader = csv.reader(out)
+            for i in csv_reader:
+                if hostname == i[0] or ip == i[1]:
+                    hosts_list.append(i[0])
+                else:
+                    with open('hosts.csv', 'a+', newline='', encoding='utf-8') as out:
+                        csv_write = csv.writer(out, dialect='excel')
+                        dataList = [hostname,ip]
+                        csv_write.writerow(dataList)
+    except Exception:
+        with open('hosts.csv', 'w+', newline='', encoding='utf-8') as out:
+            csv_write = csv.writer(out, dialect='excel')
+            dataList = [hostname, ip]
+            csv_write.writerow(dataList)
 
 #配置/etc/hosts,需要查文本
 def setHosts():
     cmd=[]
-    with open('./hosts.csv', 'r',newline='',encoding='utf-8') as out:
+    with open('hosts.csv', 'r',newline='',encoding='utf-8') as out:
         csv_reader=csv.reader(out)
         for i in csv_reader:
             a="sudo echo \"{0} {1}\" > /etc/hosts".format(i[0],i[1])
@@ -80,11 +87,10 @@ EOF
 
 def deployBase(hostname,ip):
     cmd=[]
-    cmd.append(aliK8sMirror)
+    cmd.append(aliK8sMirror())
     cmd.append(stopSecurity())
     cmd.append(stopSwap())
     cmd.append(setHost(hostname))
-    cmd.append(saveFile(hostname, ip))
     cmd.append(setHosts())
     cmd.append(setNtp())
     cmd.append(iptablesBridge())
