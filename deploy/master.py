@@ -8,7 +8,7 @@ def yumKube():
 
 #kubeadm init 初始化(只有第一次部署master需要，需要参数deploy:1)，ip为kubeapi的地址
 def kubeInit(ip):
-    cmd="sudo kubeadm init --apiserver-advertise-address="+str(ip)+" --image-repository registry.aliyuncs.com/google_containers --kubernetes-version v1.23.5 --service-cidr=10.1.0.0/16 --pod-network-cidr=10.244.0.0/16 > ~/kube-init.log"
+    cmd="sudo kubeadm init --v=5 --apiserver-advertise-address="+str(ip)+" --image-repository registry.aliyuncs.com/google_containers --kubernetes-version v1.23.5 --service-cidr=10.1.0.0/16 --pod-network-cidr=10.244.0.0/16 > ~/kube-init.log"
     return cmd
 
 #获取init初始化后的kubeadm join token命令(与kubeInit函数绑定)

@@ -55,7 +55,7 @@ def setHosts():
     with open('hosts.csv', 'r',newline='',encoding='utf-8') as out:
         csv_reader=csv.reader(out)
         for i in csv_reader:
-            a="sudo echo \"{0} {1}\" > /etc/hosts".format(i[0],i[1])
+            a="sudo echo \"{0} {1}\" > /etc/hosts".format(i[1],i[0])
             cmd.append(a)
     cmd=str(cmd).replace("[","").replace("]","").replace(",",";").replace("'","")
     return cmd

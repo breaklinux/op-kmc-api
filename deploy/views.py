@@ -43,17 +43,17 @@ def sshLinux(host,port,username,password,hostname,ip,logsize,registries,deploy):
                 print("命令执行结果：" + str(o))
                 cmd = master.joinToken()   #获取jointoken命令
                 out = sshCmd(ssh_client,cmd)
+                master.saveTokenFile(out)# 存入本地
             elif deploy == 2:
                 cmd = master.joinTokenNew()  #获取token命令(最新)
                 out = sshCmd(ssh_client,cmd)
-            cmd_list=[]
-            master.saveTokenFile(out)  # 存入本地
-            cmd_list.append(master.joinMasterCluster())  # 获取jointoken命令后执行加入
-            cmd_list.append(master.kubectlPermission())   #配置kubectl
-            cmd_list.append(master.flannel())  #配置flannel
-            for c in cmd_list:
-                o = sshCmd(ssh_client, c)
-                print("命令执行结果：" + str(o))
+                master.saveTokenFile(out)# 存入本地
+                cmd = master.joinMasterCluster()# 获取jointoken命令后执行加入
+                sshCmd(ssh_client,cmd)
+            master.kubectlPermission()   #配置kubectl
+            master.flannel()  #配置flannel
+            o = sshCmd(ssh_client, c)
+            print("命令执行结果：" + str(o))
 
         # 安装node(deploy：3为node节点)
         if deploy == 3:
