@@ -13,12 +13,12 @@ def kubeInit(ip):
 
 #获取init初始化后的kubeadm join token命令(与kubeInit函数绑定)
 def joinToken():
-    cmd="cat ~/kube-init.log | grep -A1 'kubectl join'"
+    cmd="cat ~/kube-init.log | grep -A1 'kubeadm join'"
     return cmd
 
 #获取kubeadm join token，token默认24小时过期(部署node及其他几套master需要)
 def joinTokenNew():
-    cmd="sudo kubeadm token create --print-join-command > ~/kube-token.log;cat ~/kube-token.log | grep -A1 'kubectl join'"
+    cmd="sudo kubeadm token create --print-join-command > ~/kube-token.log;cat ~/kube-token.log | grep -A1 'kubeadm join'"
     return cmd
 
 #把获取到的token存放到文本内
@@ -28,6 +28,10 @@ def saveTokenFile(kube_join_cmd):
         dataList = [kube_join_cmd]
         csv_write.writerow(dataList)
 
+#拷贝pki文件
+def pki():
+    pass
+
 #把获取到的Token执行加入k8s集群
 def joinMasterCluster():
     with open('./kube_join.csv', 'r',newline='',encoding='utf-8') as out:
@@ -35,7 +39,7 @@ def joinMasterCluster():
         cmd=""
         for i in csv_reader:
             cmd += str(i)
-        cmd=str(cmd).replace("[","").replace("]","").replace(",",";").replace("'","")+"--experimental-control-plane"
+        cmd=str(cmd).replace("[","").replace("]","").replace(",",";").replace("'","").replace("\"","")+" --control-plane"
         return cmd
 
 #配置kubectl认证权限，使用
@@ -45,5 +49,5 @@ def kubectlPermission():
 
 #部署flannel
 def flannel():
-    cmd="kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml"
+    cmd="kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
     return cmd

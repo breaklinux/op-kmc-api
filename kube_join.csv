@@ -1,1 +1,2 @@
-b''
+"kubeadm join 192.168.89.163:6443 --token pq5n57.07nvjgj1c1ua6wrk --discovery-token-ca-cert-hash sha256:65b655126068abe73b9ba3c6745d0bda2507abbe13d586fb8d1fd99f96f30af4 
+"

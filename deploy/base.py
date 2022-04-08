@@ -35,6 +35,7 @@ def saveFile(hostname,ip):
     try:
         with open('hosts.csv', 'r+',newline='',encoding='utf-8') as out:
             csv_reader = csv.reader(out)
+            hosts_list=[]
             for i in csv_reader:
                 if hostname == i[0] or ip == i[1]:
                     hosts_list.append(i[0])

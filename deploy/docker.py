@@ -27,7 +27,8 @@ def daemon(logsize,registries):
     "log-opts":{
         "max-size": "'''+str(logsize)+'''"
     },
-    "insecure-registries": ["'''+str(registries)+'''"] 
+    "insecure-registries": ["'''+str(registries)+'''"],
+    "exec-opts": ["native.cgroupdriver=systemd"]
 }
 EOF
     '''
