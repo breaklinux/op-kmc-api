@@ -32,7 +32,8 @@
 ```
 # 项目运行
 ```
-python3 manage.py runserver 0.0.0.0:8000
+python3 manage.py runserver 0.0.0.0:8000 #运行项目
+python manage.py createsuperuser #开启admin 后台管理 设置登陆管理密码
 ```
 
 # Requirement document (功能需求)
