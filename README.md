@@ -4,21 +4,19 @@
 
 # Contributing code person (贡献代码人员)
 
-| Id | name | mail | things | used|
-| --- | --- | --- | --- | --- |
-| 1   | breaklinux| breaklinux@163.com |     |     |
-|     |           |           |        |     |
-|     |           |           |        |     |
-|     |           |           |        |     |
-|     |           |           |        |     |
+| Id | name | mail | 
+| --- | --- | --- | 
+| 1   | breaklinux| breaklinux@163.com 
+|     |           |           |        |
+|     |           |           |        |
 
 
 # 基础环境介绍;
 
-| 软件版本信息 | 系统/内核信息 |  |
+| 软件版本信息 | 系统/内核信息 |  用途|
 | --- | --- | --- |
-| Python 3.6.8   | Centos 7.2| 
-| Django3.2.12   | 3.10.0-862.6.3.el7.x86_64 |        
+| Python 3.6.8   | Centos 7.2 ｜ 开发语言版本
+| Django3.2.12   | 3.10.0-862.6.3.el7.x86_64  ｜ OS系统内核版本       
 
 
 
