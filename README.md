@@ -12,6 +12,26 @@
 |     |           |           |        |     |
 |     |           |           |        |     |
 
+
+# 基础环境介绍;
+
+   软件版本信息  |系统/内核信息 |项目目录功能介绍
+  -|-|-
+  Python 3.6.8     |Centos 7.2 | tools jekins jobs相关xml配置
+  Django3.2.12       |3.10.0-862.6.3.el7.x86_64  |boot.py flask 程序启动入口文件
+
+
+# 项目系统依赖包安装;  
+```
+   (1).centos 7x系统安装支持包;  
+   yum -y install python36 mysql-devel libxml2* mysql initscripts python36-devel python36-pip python36-setuptools mysql-devel libxml2*  mysql initscripts psmisc python-devel openldap-devel
+ 
+   (2).安装项目依赖包pip3方式;  
+   /usr/local/bin/pip3.6 install --upgrade pip  
+   /usr/local/bin/pip3.6 install --upgrade setuptools  
+   /usr/local/bin/pip3.6 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #国内指定清华源
+```
+
 # Requirement document (功能需求)
 
 - 1.系统用户统一使用 LDAP 用户登录验证生成有时间限制Token 进行统一登录.
