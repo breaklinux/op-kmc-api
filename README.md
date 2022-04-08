@@ -30,6 +30,10 @@
    /usr/local/bin/pip3.6 install --upgrade setuptools  
    /usr/local/bin/pip3.6 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #国内指定清华源
 ```
+# 项目运行
+```
+python3 manage.py runserver 0.0.0.0:8000
+```
 
 # Requirement document (功能需求)
 
