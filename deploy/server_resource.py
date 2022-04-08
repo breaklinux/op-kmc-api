@@ -9,14 +9,15 @@ def df(ssh_client):
     dflist = []
     uselist = []
     info = {}
+    data = {}
     for df in dfout:
         dflist.append(df.replace('\n', ''))
     for use in useout:
         uselist.append(use.replace('\n', ''))
     for i, x in enumerate(dflist):
-        info[dflist[i]] = uselist[i]
+        data[dflist[i]] = uselist[i]
     info["remark"] = "硬盘及占用率"
-    info["data"] = info
+    info["data"] = data
     return info
 
 #内存
@@ -24,19 +25,23 @@ def mem(ssh_client):
     cmd="free -t | awk 'NR == 2 {print $3/$2*100}'"    #获取内存占用率
     stdin, useout, stderr = ssh_client.exec_command(cmd,get_pty=True)
     info = {}
+    data = {}
     for usage in useout:
-        info["usage"] = usage
+        data["usage"] = usage
+    info["data"] = data
     info["remark"] = "内存及占用率"
-    info["data"] = info
     return info
 
 #cpu
 def cpu(ssh_client):
-    cmd="top -b -n1 | fgrep \"Cpu(s)\" | tail -1 | awk -F'id,' '{split($1, vs, \",\"); v=vs[length(vs)]; sub(/\s+/, \"\", v);sub(/\s+/, \"\", v); printf \"%s\n\", 100-v; }'"
+    cmd='''
+    top -b -n1 | fgrep "Cpu(s)" | tail -1 | awk -F\'id,\' \'{split($1, vs, ","); v=vs[length(vs)]; sub(/\s+/, "", v);sub(/\s+/, "", v); printf "%s", 100-v; }\'
+    '''
     stdin, useout, stderr = ssh_client.exec_command(cmd,get_pty=True)
     info = {}
+    data = {}
     for usage in useout:
-        info["usage"] = usage
+        data["usage"] = usage
+    info["data"] = data
     info["remark"] = "cpu使用率"
-    info["data"] = info
     return info
