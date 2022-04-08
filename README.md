@@ -1,12 +1,12 @@
 # op-kmc-api
 
-  1.kmc (Kubernetes Management Control ) K8S管理控制系统 本项目主要适用于开源版本K8S系统功能管理后台APi
+1.kmc (Kubernetes Management Control ) K8S管理控制系统 本项目主要适用于开源版本K8S系统功能管理后台APi
 
 # Contributing code person (贡献代码人员)
 
 | Id | name | mail | 
 | --- | --- | --- | 
-| 1   | breaklinux| breaklinux@163.com 
+| 1   | breaklinux| breaklinux@163.com
 |     |           |           |        |
 |     |           |           |        |
 
@@ -15,20 +15,20 @@
 
 | 软件版本信息 | 系统/内核信息 |  用途 |
 | --- | --- | --- |
-| Python 3.6.8  | Centos 7.2  
+| Python 3.7.9  | Centos 7.2
 | Django3.2.12  | 3.10.0-862.6.3.el7.x86_64
 
 
 
-# 项目系统依赖包安装;  
+# 项目系统依赖包安装;
 ```
    (1).centos 7x系统安装支持包;  
-   yum -y install python36 mysql-devel libxml2* mysql initscripts python36-devel python36-pip python36-setuptools mysql-devel libxml2*  mysql initscripts psmisc python-devel openldap-devel
+   yum -y install python37 mysql-devel libxml2* mysql initscripts python36-devel python37-pip python37-setuptools mysql-devel libxml2*  mysql initscripts psmisc python-devel openldap-devel
  
    (2).安装项目依赖包pip3方式;  
-   /usr/local/bin/pip3.6 install --upgrade pip  
-   /usr/local/bin/pip3.6 install --upgrade setuptools  
-   /usr/local/bin/pip3.6 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #国内指定清华源
+   /usr/local/bin/pip3.7 install --upgrade pip  
+   /usr/local/bin/pip3.7 install --upgrade setuptools  
+   /usr/local/bin/pip3.7 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #国内指定清华源
 ```
 # 项目运行
 ```
@@ -76,7 +76,7 @@ python manage.py createsuperuser #开启admin 后台管理 设置登陆管理密
 | type        |是   |str   |账号类型 默认值:ldap 或者 标准standard
 
 
- **请求示例**
+**请求示例**
 ```
 {
 	 "username":"ops",
@@ -84,7 +84,7 @@ python manage.py createsuperuser #开启admin 后台管理 设置登陆管理密
 	 "type": "ldap"
 }
 ```
- **标准正常返回参数**
+**标准正常返回参数**
 ```
 {
    {
@@ -109,7 +109,7 @@ python manage.py createsuperuser #开启admin 后台管理 设置登陆管理密
 }
 ```
 
- **备注**
+**备注**
 
 - code状态码描述
   0 表示系统正常响应;
