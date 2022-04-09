@@ -1,9 +1,10 @@
-#系统级别基础配置
+# 系统级别基础配置
 import csv
 
-#配置K8Syum源
+
+# 配置K8Syum源
 def aliK8sMirror():
-    cmd='''
+    cmd = '''
     sudo cat > /etc/yum.repos.d/kubernetes.repo << EOF
 [kubernetes]
 name=Kubernetes
@@ -15,34 +16,39 @@ gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors
 EOF
     '''
     return cmd
-#防火墙、selinux
+
+
+# 防火墙、selinux
 def stopSecurity():
-    cmd="sudo sed -i 's/enforcing/disabled/' /etc/selinux/config;sudo setenforce 0;sudo systemctl stop firewalld;sudo systemctl disable firewalld"
+    cmd = "sudo sed -i 's/enforcing/disabled/' /etc/selinux/config;sudo setenforce 0;sudo systemctl stop firewalld;sudo systemctl disable firewalld"
     return cmd
 
-#swap关闭
+
+# swap关闭
 def stopSwap():
-    cmd="sudo swapoff -a;sudo sed -ri 's/.*swap.*/#&/' /etc/fstab"
+    cmd = "sudo swapoff -a;sudo sed -ri 's/.*swap.*/#&/' /etc/fstab"
     return cmd
 
-#配置主机名
+
+# 配置主机名
 def setHost(hostname):
-    cmd="sudo hostnamectl set-hostname {0}".format(hostname)
+    cmd = "sudo hostnamectl set-hostname {0}".format(hostname)
     return cmd
 
-#获取主机名及IP地址，存入到文本
-def saveFile(hostname,ip):
+
+# 获取主机名及IP地址，存入到文本
+def saveFile(hostname, ip):
     try:
-        with open('hosts.csv', 'r+',newline='',encoding='utf-8') as out:
+        with open('hosts.csv', 'r+', newline='', encoding='utf-8') as out:
             csv_reader = csv.reader(out)
-            hosts_list=[]
+            hosts_list = []
             for i in csv_reader:
                 if hostname == i[0] or ip == i[1]:
                     hosts_list.append(i[0])
                 else:
                     with open('hosts.csv', 'a+', newline='', encoding='utf-8') as out:
                         csv_write = csv.writer(out, dialect='excel')
-                        dataList = [hostname,ip]
+                        dataList = [hostname, ip]
                         csv_write.writerow(dataList)
     except Exception:
         with open('hosts.csv', 'w+', newline='', encoding='utf-8') as out:
@@ -50,30 +56,34 @@ def saveFile(hostname,ip):
             dataList = [hostname, ip]
             csv_write.writerow(dataList)
 
-#配置/etc/hosts,需要查文本
+
+# 配置/etc/hosts,需要查文本
 def setHosts():
-    cmd=[]
-    with open('hosts.csv', 'r',newline='',encoding='utf-8') as out:
-        csv_reader=csv.reader(out)
+    cmd = []
+    with open('hosts.csv', 'r', newline='', encoding='utf-8') as out:
+        csv_reader = csv.reader(out)
         for i in csv_reader:
-            a="sudo echo \"{0} {1}\" > /etc/hosts".format(i[1],i[0])
+            a = "sudo echo \"{0} {1}\" > /etc/hosts".format(i[1], i[0])
             cmd.append(a)
-    cmd=str(cmd).replace("[","").replace("]","").replace(",",";").replace("'","")
+    cmd = str(cmd).replace("[", "").replace("]", "").replace(",", ";").replace("'", "")
     return cmd
 
-#设置时区
+
+# 设置时区
 def setNtp():
-    cmd="sudo timedatectl set-timezone Asia/Shanghai;sudo timedatectl set-local-rtc 0;sudo systemctl restart rsyslog;sudo systemctl restart crond"
+    cmd = "sudo timedatectl set-timezone Asia/Shanghai;sudo timedatectl set-local-rtc 0;sudo systemctl restart rsyslog;sudo systemctl restart crond"
     return cmd
 
-#路由转发
+
+# 路由转发
 def iptablesBridge():
-    cmd="sudo echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.d/k8s.conf;sudo echo 'net.bridge.bridge-nf-call-ip6tables = 1' >> /etc/sysctl.d/k8s.conf;sudo echo 'net.bridge.bridge-nf-call-iptables = 1' >> /etc/sysctl.d/k8s.conf"
+    cmd = "sudo echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.d/k8s.conf;sudo echo 'net.bridge.bridge-nf-call-ip6tables = 1' >> /etc/sysctl.d/k8s.conf;sudo echo 'net.bridge.bridge-nf-call-iptables = 1' >> /etc/sysctl.d/k8s.conf"
     return cmd
 
-#ipvs
+
+# ipvs
 def setIpvs():
-    cmd='''
+    cmd = '''
     sudo cat > /etc/sysconfig/modules/ipvs.modules << EOF
 #!/bin/bash
 modprobe -- ip_vs
@@ -83,11 +93,13 @@ modprobe -- ip_vs_sh
 modprobe -- nf_conntrack
 EOF
     sudo /bin/bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack
+    echo "/bin/bash /etc/sysconfig/modules/ipvs.modules" >>/etc/rc.local
     '''
     return cmd
 
-def deployBase(hostname,ip):
-    cmd=[]
+
+def deployBase(hostname, ip):
+    cmd = []
     cmd.append(aliK8sMirror())
     cmd.append(stopSecurity())
     cmd.append(stopSwap())
