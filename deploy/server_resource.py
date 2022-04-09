@@ -1,11 +1,11 @@
-#获取master、node系统资源，返回(CPU、内存、硬盘信息、资源上POD个数)
+# 获取master、node系统资源，返回(CPU、内存、硬盘信息、资源上POD个数)
 
 # 硬盘
 def df(ssh_client):
-    cmd1="df -hT | awk '{print $NF,$(NF-1)}' | sed '1d' |awk '{print $1}'" #获取硬盘占用率
-    cmd2="df -hT | awk '{print $NF,$(NF-1)}' | sed '1d' |awk '{print $2}'" #获取磁盘名称
-    stdin, dfout, stderr = ssh_client.exec_command(cmd1,get_pty=True)
-    stdin, useout, stderr = ssh_client.exec_command(cmd2,get_pty=True)
+    cmd1 = "df -hT | awk '{print $NF,$(NF-1)}' | sed '1d' |awk '{print $1}'"  # 获取硬盘占用率
+    cmd2 = "df -hT | awk '{print $NF,$(NF-1)}' | sed '1d' |awk '{print $2}'"  # 获取磁盘名称
+    stdin, dfout, stderr = ssh_client.exec_command(cmd1, get_pty=True)
+    stdin, useout, stderr = ssh_client.exec_command(cmd2, get_pty=True)
     dflist = []
     uselist = []
     info = {}
@@ -20,10 +20,11 @@ def df(ssh_client):
     info["data"] = data
     return info
 
-#内存
+
+# 内存
 def mem(ssh_client):
-    cmd="free -t | awk 'NR == 2 {print $3/$2*100}'"    #获取内存占用率
-    stdin, useout, stderr = ssh_client.exec_command(cmd,get_pty=True)
+    cmd = "free -t | awk 'NR == 2 {print $3/$2*100}'"  # 获取内存占用率
+    stdin, useout, stderr = ssh_client.exec_command(cmd, get_pty=True)
     info = {}
     data = {}
     for usage in useout:
@@ -32,12 +33,13 @@ def mem(ssh_client):
     info["remark"] = "内存及占用率"
     return info
 
-#cpu
+
+# cpu
 def cpu(ssh_client):
-    cmd='''
+    cmd = '''
     top -b -n1 | fgrep "Cpu(s)" | tail -1 | awk -F\'id,\' \'{split($1, vs, ","); v=vs[length(vs)]; sub(/\s+/, "", v);sub(/\s+/, "", v); printf "%s", 100-v; }\'
     '''
-    stdin, useout, stderr = ssh_client.exec_command(cmd,get_pty=True)
+    stdin, useout, stderr = ssh_client.exec_command(cmd, get_pty=True)
     info = {}
     data = {}
     for usage in useout:

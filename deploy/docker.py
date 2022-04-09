@@ -1,5 +1,7 @@
 # 部署docker
 import datetime
+
+
 # 安装依赖包
 def dependentPackages():
     cmd = "sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf && sudo sed -i 's/plugins=1/plugins=0/g' /etc/yum.conf && sudo yum -y install yum-utils device-mapper-persistent-data lvm2 && sudo yum clean all "

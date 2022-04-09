@@ -40,17 +40,7 @@ def installIpvsPkg():
 # 设置内核启动
 def setGrubBot():
     cmd = '''sudo 
-    grub2-set-default 0 &&
-sudo cat > /etc/default/grub << EOF
-GRUB_TIMEOUT=5
-GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)"
-GRUB_DEFAULT=0
-GRUB_DISABLE_SUBMENU=true
-GRUB_TERMINAL_OUTPUT="console"
-GRUB_CMDLINE_LINUX="crashkernel=auto rd.lvm.lv=vg_root/lv_root rhgb quiet"
-GRUB_DISABLE_RECOVERY="true"
-EOF
-    '''
+    grub2-set-default 0 '''
     return cmd
 
 # 生成grub文件
@@ -63,6 +53,8 @@ def rebootSystem(is_boot=False):
     if is_boot:
        cmd = "sudo reboot"
        return cmd
+    else:
+        print("host reboot")
 
 # 查看内核版本
 def listKernelRpm():
@@ -79,9 +71,10 @@ def installYumUtils():
     cmd = "sudo yum install -y yum-utils"
     return cmd
 
-# 删除旧版本
-def uninstallOldPackages():
-    cmd = "sudo package-cleanup --oldkernels -y"
+# 新内核补丁mpt2sas升级为mpt3sas
+def mpt2sasToMpt3sas():
+    cmd = "dracut --force --add-drivers mpt3sas --kver=5.3.6"
+    return cmd
 
 # 删除旧版本
 """
@@ -100,10 +93,8 @@ def upgradeKernel():
     cmd.append(installIpvsPkg())
     cmd.append(list_kernel())
     cmd.append(installNewKernel())
-    cmd.append(setGrubBot())
     cmd.append(buildGrub())
     cmd.append(rebootSystem())
     cmd.append(listNewKernels())
     cmd.append(uninstallOldKernel())
-    cmd.append(uninstallOldPackages())
     return cmd

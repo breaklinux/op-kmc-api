@@ -16,9 +16,11 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from deploy import views as k8s_deploy
+from celery_tasks import views as k8s_os_system_upgrade
 from django.urls import path, re_path, include
 
 urlpatterns = [
    # url(r'^admin/', admin.site.urls),
+   path('os_upgrade',k8s_os_system_upgrade.kernelUpgrade),
    path('deploy',k8s_deploy.sshDeploy),
 ]
