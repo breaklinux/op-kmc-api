@@ -2,7 +2,7 @@ from deploy import os_kernel_upgrade, base, docker, master, node, server_resourc
 from django.http import JsonResponse
 import paramiko
 import json
-
+from tools.datetime_tools import runTime,runTimeCalculate
 
 def sshCmd(ssh_client, c):
     print("执行命令:{0}".format(c))
