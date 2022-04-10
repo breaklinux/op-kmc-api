@@ -1,10 +1,8 @@
 from celery.schedules import crontab
 from kombu import Queue
-from celery_tasks.main import app
 
 # 配置代理人，指定代理人将任务存到哪里,这里是redis的14号库
-broker_url = 'redis://192.168.1.200:6379/14'
-
+broker_url = 'redis://192.168.1.202:6379/14'
 # celery worker的并发数，默认是服务器的内核数目,也是命令行-c参数指定的数目
 # CELERYD_CONCURRENCY = 8
 worker_concurrency = 4

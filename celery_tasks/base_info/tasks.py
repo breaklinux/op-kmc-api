@@ -4,7 +4,7 @@ import time
 from celery_tasks.main import app
 import paramiko
 from django.http import JsonResponse
-#from tools.datetime_tools import runTime, runTimeCalculate
+# from tools.datetime_tools import runTime, runTimeCalculate
 
 # 升级操作系统内核版本.便于后期新增组件和ebpf cni插件功能
 import csv
@@ -36,8 +36,9 @@ def installNewKernel():
 
 # 查看可用内核
 def listNewKernels():
-    cmd = '''sudo awk -F\' '$1=="menuentry " {print i++ " : " $2}' /etc/grub2.cfg'''
+    cmd = "grep 'menuentry' /etc/grub2.cfg |grep 'CentOS Linux'"
     return cmd
+
 
 # 安装ipvs软件包
 
@@ -45,16 +46,19 @@ def installIpvsPkg():
     cmd = "sudo yum -y install ipset ipvsadm"
     return cmd
 
+
 # 设置内核启动
 def setGrubBot():
     cmd = '''sudo 
     grub2-set-default 0 '''
     return cmd
 
+
 # 生成grub文件
 def buildGrub():
     cmd = "sudo grub2-mkconfig -o /boot/grub2/grub.cfg"
     return cmd
+
 
 # 重启机器...
 def rebootSystem(is_boot=False):
@@ -62,27 +66,33 @@ def rebootSystem(is_boot=False):
         cmd = "sudo reboot"
         return cmd
     else:
-        print("host reboot")
+        cmd = "sudo rpm -qa | grep 'kernel-5.*'"
+        return cmd
+
 
 # 查看内核版本
 def listKernelRpm():
     cmd = "sudo rpm -qa | grep kernel"
     return cmd
 
+
 # 卸载旧版本内核
 def uninstallOldKernel():
     cmd = "sudo yum remove -y kernel-tools-libs-3.*  kernel-3.* "
     return cmd
+
 
 # 安装utils工具
 def installYumUtils():
     cmd = "sudo yum install -y yum-utils"
     return cmd
 
+
 # 新内核补丁mpt2sas升级为mpt3sas
 def mpt2sasToMpt3sas():
     cmd = "dracut --force --add-drivers mpt3sas --kver=5.3.6"
     return cmd
+
 
 # 删除旧版本
 """
@@ -93,7 +103,6 @@ uninstall_old_packages() {
     package-cleanup --oldkernels -y
 }
 """
-
 
 
 def sshCmd(ssh_client, c):
@@ -110,11 +119,13 @@ def sshCmd(ssh_client, c):
         print("命令执行错误：" + str(data))
         return data.read()
 
+
 def sshLinux(host, port, username, password):
     ssh_client = paramiko.SSHClient()
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh_client.connect(hostname=host, port=port, username=username, password=password)
     return ssh_client
+
 
 # 升级内核主入口
 @app.task(name='upgradeKernel')
@@ -130,9 +141,8 @@ def upgradeKernel(host, port, username, password):
     cmd.append(listNewKernels())
     cmd.append(uninstallOldKernel())
     print("操作系统内核更新升级中......")
-    #startUpgradeTime = runTime()
+    # startUpgradeTime = runTime()
     for upgrade in cmd:
-        sshCmd(sshLinux(host, port, username, password),upgrade)
-    #endUpgradeTime = runTime()
-    #runTimeCalculate("操作系统内核更新升级中耗时: ", endUpgradeTime, startUpgradeTime)
-
+        sshCmd(sshLinux(host, port, username, password), upgrade)
+    # endUpgradeTime = runTime()
+    # runTimeCalculate("操作系统内核更新升级中耗时: ", endUpgradeTime, startUpgradeTime)

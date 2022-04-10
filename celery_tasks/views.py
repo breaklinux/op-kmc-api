@@ -15,9 +15,9 @@ def kernelUpgrade(request):
         username = data.get('username')
         password = data.get('password')
         if host and port and username and password:
-            a = upgradeKernel(host, port, username, password).delay()
-            msg = "异步更新-更新os系统内核中....."
-            return JsonResponse(standardResponse(msg))
+            task_id = upgradeKernel.delay(host, port, username, password)
+            msg = "异步操作-更新os系统内核中.请跟进taskId进行查询结果...."
+            return JsonResponse(standardResponse(msg=msg, taskId=task_id))
     else:
         return JsonResponse(standardResponse(methodResponseMsg))
 
@@ -27,9 +27,9 @@ def kernelUpgrade(request):
 """
 
 
-def standardResponse(msg=None, token=None):
+def standardResponse(msg=None, token=None, taskId=None):
     if not token:
-        data = {"code": 1, "message": msg, "data": {"token": "", "state": "false"}}
+        data = {"code": 1, "message": msg, "data": {"token": "", "state": "false"}, "task_id": str(taskId)}
     else:
-        data = {"code": 0, "message": msg, "data": {"token": token, "state": "true"}}
+        data = {"code": 0, "message": msg, "data": {"token": token, "state": "true"}, "task_id": str(taskId)}
     return data
