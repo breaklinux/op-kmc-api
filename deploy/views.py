@@ -1,24 +1,9 @@
 from deploy import base, docker, master, node, server_resource
 from django.http import JsonResponse
 from tools.datetime_tools import runTime,runTimeCalculate
+from tools.ssh_channel import sshChannelManager
 import paramiko
 import json
-
-
-def sshCmd(ssh_client, c):
-    print("执行命令:{0}".format(c))
-    stdin, stdout, stderr = ssh_client.exec_command(c, get_pty=True)
-    if not stdout is None:
-        data = stdout.read()
-        data = data.decode("utf-8")
-        print("命令执行结果：" + str(data))
-        return data
-    if not stderr is None:
-        data = stderr.read()
-        data = data.decode("utf-8")
-        print("命令执行错误：" + str(data))
-        return data.read()
-
 
 # 配置ssh登录linux客户端
 def sshLinux(host, port, username, password, hostname, ip, logsize, registries, deploy):

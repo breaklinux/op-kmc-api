@@ -1,16 +1,15 @@
 import logging
 import os
 import time
-from celery_tasks.main import app
+from celery_kernel_upgrade.main import app
 import paramiko
 from django.http import JsonResponse
-# from tools.datetime_tools import runTime, runTimeCalculate
-
+from tools.datetime_tools import runTime, runTimeCalculate
+from tools.ssh_channel import sshChannelManager
 # 升级操作系统内核版本.便于后期新增组件和ebpf cni插件功能
-import csv
-
 
 # 升级操作系统最新软件包
+
 def updateYum():
     cmd = "sudo yum -y update "
     return cmd
@@ -104,32 +103,32 @@ uninstall_old_packages() {
 }
 """
 
-
-def sshCmd(ssh_client, c):
-    print("执行命令:{0}".format(c))
-    stdin, stdout, stderr = ssh_client.exec_command(c, get_pty=True)
-    if not stdout is None:
-        data = stdout.read()
-        data = data.decode("utf-8")
-        print("命令执行结果：" + str(data))
-        return data
-    if not stderr is None:
-        data = stderr.read()
-        data = data.decode("utf-8")
-        print("命令执行错误：" + str(data))
-        return data.read()
-
-
-def sshLinux(host, port, username, password):
-    ssh_client = paramiko.SSHClient()
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh_client.connect(hostname=host, port=port, username=username, password=password)
-    return ssh_client
+# def sshCmd(ssh_client, c):
+#     print("执行命令:{0}".format(c))
+#     stdin, stdout, stderr = ssh_client.exec_command(c, get_pty=True)
+#     if not stdout is None:
+#         data = stdout.read()
+#         data = data.decode("utf-8")
+#         print("命令执行结果：" + str(data))
+#         return data
+#     if not stderr is None:
+#         data = stderr.read()
+#         data = data.decode("utf-8")
+#         print("命令执行错误：" + str(data))
+#         return data.read()
+#
+#
+# def sshLinux(host, port, username, password):
+#     ssh_client = paramiko.SSHClient()
+#     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#     ssh_client.connect(hostname=host, port=port, username=username, password=password)
+#     return ssh_client
 
 
 # 升级内核主入口
 @app.task(name='upgradeKernel')
 def upgradeKernel(host, port, username, password):
+    ssh_remove_exec_cmd = sshChannelManager(host, port, username)
     cmd = []
     cmd.append(updateYum())
     cmd.append(changeKernelRepo())
@@ -141,8 +140,8 @@ def upgradeKernel(host, port, username, password):
     cmd.append(listNewKernels())
     cmd.append(uninstallOldKernel())
     print("操作系统内核更新升级中......")
-    # startUpgradeTime = runTime()
+    startUpgradeTime = runTime()
     for upgrade in cmd:
-        sshCmd(sshLinux(host, port, username, password), upgrade)
-    # endUpgradeTime = runTime()
-    # runTimeCalculate("操作系统内核更新升级中耗时: ", endUpgradeTime, startUpgradeTime)
+        ssh_remove_exec_cmd.sshExecCommand(upgrade, password)
+    endUpgradeTime = runTime()
+    runTimeCalculate("操作系统内核更新升级中耗时: ", endUpgradeTime, startUpgradeTime)

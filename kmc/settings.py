@@ -12,6 +12,15 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 
+# Celery settings
+CELERY_BROKER_URL = 'redis://192.168.1.202:6379/14'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'redis://192.168.1.202:6379/15'
+CELERY_TASK_SERIALIZER = 'json'
+worker_concurrency = 4
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,7 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'deploy',
-    'celery_tasks'
+    'celery_kernel_upgrade'
 ]
 
 MIDDLEWARE = [

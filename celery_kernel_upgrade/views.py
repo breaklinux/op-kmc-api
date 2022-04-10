@@ -1,7 +1,6 @@
-from deploy import os_kernel_upgrade, base, docker, master, node, server_resource
 from django.http import JsonResponse
 import json
-from celery_tasks.base_info.tasks import upgradeKernel
+from celery_kernel_upgrade.tasks import upgradeKernel
 
 
 def kernelUpgrade(request):

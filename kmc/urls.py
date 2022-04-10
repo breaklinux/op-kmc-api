@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from deploy import views as k8s_deploy
-from celery_tasks import views as k8s_os_system_upgrade
+from celery_kernel_upgrade import views as k8s_os_system_upgrade
 from django.urls import path, re_path, include
 
 urlpatterns = [
