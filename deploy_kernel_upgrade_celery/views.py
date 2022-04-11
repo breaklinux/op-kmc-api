@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 import json
-from celery_kernel_upgrade.tasks import upgradeKernel
+from deploy_kernel_upgrade_celery.tasks import dp_upgradeKernel
+from base.standard_respon import kmc_Response
 
 
 def kernelUpgrade(request):
@@ -14,21 +15,9 @@ def kernelUpgrade(request):
         username = data.get('username')
         password = data.get('password')
         if host and port and username and password:
-            task_id = upgradeKernel.delay(host, port, username, password)
+            task_id = dp_upgradeKernel.delay(host, port, username, password)
             msg = "异步操作-更新os系统内核中.请跟进taskId进行查询结果...."
-            return JsonResponse(standardResponse(msg=msg, taskId=task_id))
+            return JsonResponse(kmc_Response(msg=msg, taskId=task_id))
     else:
-        return JsonResponse(standardResponse(methodResponseMsg))
+        return JsonResponse(kmc_Response(methodResponseMsg))
 
-
-"""
- 1.公共返回数据格式
-"""
-
-
-def standardResponse(msg=None, token=None, taskId=None):
-    if not token:
-        data = {"code": 1, "message": msg, "data": {"token": "", "state": "false"}, "task_id": str(taskId)}
-    else:
-        data = {"code": 0, "message": msg, "data": {"token": token, "state": "true"}, "task_id": str(taskId)}
-    return data

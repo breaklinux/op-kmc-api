@@ -1,11 +1,11 @@
 import logging
 import os
 import time
-from celery_kernel_upgrade.main import app
+from deploy_kernel_upgrade_celery.main import app
 import paramiko
 from django.http import JsonResponse
-from tools.datetime_tools import runTime, runTimeCalculate
-from tools.ssh_channel import sshChannelManager
+from base.datetime_tools import runTime, runTimeCalculate
+from base.ssh_channel import sshChannelManager
 # 升级操作系统内核版本.便于后期新增组件和ebpf cni插件功能
 
 # 升级操作系统最新软件包
@@ -126,8 +126,8 @@ uninstall_old_packages() {
 
 
 # 升级内核主入口
-@app.task(name='upgradeKernel')
-def upgradeKernel(host, port, username, password):
+@app.task(name='dp_upgradeKernel')
+def dp_upgradeKernel(host, port, username, password):
     ssh_remove_exec_cmd = sshChannelManager(host, port, username)
     cmd = []
     cmd.append(updateYum())
@@ -144,4 +144,5 @@ def upgradeKernel(host, port, username, password):
     for upgrade in cmd:
         ssh_remove_exec_cmd.sshExecCommand(upgrade, password)
     endUpgradeTime = runTime()
-    runTimeCalculate("操作系统内核更新升级中耗时: ", endUpgradeTime, startUpgradeTime)
+    runtime = runTimeCalculate("操作系统内核更新升级中耗时: ", endUpgradeTime, startUpgradeTime)
+    return {"code": 0, "message": "操作系统内核更新升级成功", "runtime": str(runtime) + " s"}

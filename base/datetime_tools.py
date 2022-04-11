@@ -11,5 +11,6 @@ def runTimeCalculate(msg, startDeployTime, endDeployTime):
     """
     calculate = (endDeployTime - startDeployTime).seconds / 1000
     print(str(msg) + str(calculate) + "秒")
+    return calculate
 
 

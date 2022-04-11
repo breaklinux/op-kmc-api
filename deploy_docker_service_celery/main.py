@@ -2,11 +2,10 @@ import os
 import logging
 from datetime import timedelta
 from celery import Celery
-from celery_kernel_upgrade import config
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kmc.settings')
 # 创建celery应用
-app = Celery('upgradeKernel')
+app = Celery('dp_dockerService')
 
 # 导入celery配置
 app.config_from_object('django.conf:settings', namespace='CELERY')
@@ -16,6 +15,6 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # app.autodiscover_tasks()  # 自动
 
 # 定时任务需要添加
-app.autodiscover_tasks(['celery_kernel_upgrade.base_info'])
+app.autodiscover_tasks(['deploy_k8s_base_celery.base_info'])
 # # 在出现worker接受到的message出现没有注册的错误时，使用下面一句能解决
 imports = ("tasks",)

@@ -1,6 +1,7 @@
 # master安装
 import csv
-
+from base.ssh_channel import sshChannelManager
+from deploy_k8s_master_celery.main import app
 
 # 安装kubeadm、kubelet、kubectl，并设置开机自启
 def yumKube():
@@ -61,3 +62,27 @@ def kubectlPermission():
 def flannel():
     cmd = "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
     return cmd
+
+
+@app.task(name='dp_k8sMaster')
+def dp_k8sMaster(host, port, username, password, advertise_address, deploy):
+    print("master环境部署中......")
+    ssh_remove_exec_cmd = sshChannelManager(host, port, username)
+    cmd = yumKube()  # 部署
+    ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+    if deploy == 1:
+        cmd = kubeInit(advertise_address)  # 初始化
+        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+        cmd = joinToken()  # 获取jointoken命令
+        out = ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+        saveTokenFile(out)  # 存入本地
+        cmd = kubectlPermission()  # 配置kubectl
+        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+        cmd = flannel()  # 部署flannel #走api接口
+        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+    elif deploy == 2:
+        cmd = joinMasterCluster()  # 获取join token命令后执行加入
+        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+        cmd = kubectlPermission()  # 配置kubectl
+        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+

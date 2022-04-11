@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'deploy',
-    'celery_kernel_upgrade'
+    'deploy_old',
+    'deploy_kernel_upgrade_celery'
 ]
 
 MIDDLEWARE = [
