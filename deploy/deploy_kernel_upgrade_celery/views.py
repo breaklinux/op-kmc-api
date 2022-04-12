@@ -1,8 +1,17 @@
+
+import os
+
+HERE = os.path.abspath(__file__)
+HOME_DIR = os.path.split(os.path.split(HERE)[0])[0]
+script_path = os.path.join(HOME_DIR, "deploy_kernel_upgrade_celery")  # 获取当前path路径
+base = os.path.join(HOME_DIR, "base")
+os.sys.path.append(script_path)
+os.sys.path.append(base)
+
 from django.http import JsonResponse
 import json
-from deploy_kernel_upgrade_celery.tasks import dp_upgradeKernel
-from base.standard_respon import kmc_Response
-
+from deploy.deploy_kernel_upgrade_celery.tasks import dp_upgradeKernel
+from standard_respon import kmc_Response
 
 def kernelUpgrade(request):
     methodResponseMsg = """{method} Method not supported""".format(method=request.method)

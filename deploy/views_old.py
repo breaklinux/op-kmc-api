@@ -1,7 +1,7 @@
-from deploy_old import base, docker, master, node, server_resource
+from deploy_old import base, docker, master, node
+import server_resource
 from django.http import JsonResponse
-from base.datetime_tools import runTime,runTimeCalculate
-from base.ssh_channel import sshChannelManager
+from deploy.base.datetime_tools import runTime,runTimeCalculate
 import paramiko
 import json
 

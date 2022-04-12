@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'deploy_old',
-    'deploy_kernel_upgrade_celery'
+    'deploy.deploy_kernel_upgrade_celery',
+    'deploy.deploy_docker_service_celery'
 ]
 
 MIDDLEWARE = [

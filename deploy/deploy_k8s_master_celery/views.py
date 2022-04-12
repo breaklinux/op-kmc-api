@@ -2,8 +2,8 @@
 """
 from django.http import JsonResponse
 import json
-from base.standard_respon import kmc_Response
-from deploy_k8s_master_celery.tasks import dp_k8sMaster
+from deploy.base.standard_respon import kmc_Response
+from deploy.deploy_k8s_master_celery.tasks import dp_k8sMaster
 
 
 def k8sMaster(request):

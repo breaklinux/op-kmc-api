@@ -1,7 +1,15 @@
 # master安装
-import csv
-from base.ssh_channel import sshChannelManager
-from deploy_k8s_master_celery.main import app
+import os
+HERE = os.path.abspath(__file__)
+HOME_DIR = os.path.split(os.path.split(HERE)[0])[0]
+script_path = os.path.join(HOME_DIR, "deploy_k8s_master_celery")  # 获取当前path路径
+base = os.path.join(HOME_DIR, "base")
+os.sys.path.append(script_path)
+os.sys.path.append(base)
+from .main import app
+from datetime_tools import runTime, runTimeCalculate
+from ssh_channel import sshChannelManager
+
 
 # 安装kubeadm、kubelet、kubectl，并设置开机自启
 def yumKube():

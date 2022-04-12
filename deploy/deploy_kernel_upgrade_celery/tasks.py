@@ -1,11 +1,14 @@
-import logging
 import os
-import time
-from deploy_kernel_upgrade_celery.main import app
-import paramiko
-from django.http import JsonResponse
-from base.datetime_tools import runTime, runTimeCalculate
-from base.ssh_channel import sshChannelManager
+HERE = os.path.abspath(__file__)
+HOME_DIR = os.path.split(os.path.split(HERE)[0])[0]
+script_path = os.path.join(HOME_DIR, "deploy_kernel_upgrade_celery")  # 获取当前path路径
+base = os.path.join(HOME_DIR, "base")
+os.sys.path.append(script_path)
+os.sys.path.append(base)
+from .main import app
+from datetime_tools import runTime, runTimeCalculate
+from ssh_channel import sshChannelManager
+app.autodiscover_tasks()
 # 升级操作系统内核版本.便于后期新增组件和ebpf cni插件功能
 
 # 升级操作系统最新软件包

@@ -1,6 +1,18 @@
+import os
+HERE = os.path.abspath(__file__)
+HOME_DIR = os.path.split(os.path.split(HERE)[0])[0]
+script_path = os.path.join(HOME_DIR, "deploy_k8s_node_celery")  # 获取当前path路径
+os.sys.path.append(script_path)
+base = os.path.join(HOME_DIR, "base")
+os.sys.path.append(script_path)
+os.sys.path.append(base)
+
 # node安装
 import csv
-from deploy_k8s_base_celery.main import app
+from .main import app
+from datetime_tools import runTime, runTimeCalculate
+from ssh_channel import sshChannelManager
+
 
 # 安装kubelet、kubeadm
 def yumKube():

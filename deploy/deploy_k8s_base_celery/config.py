@@ -1,12 +1,18 @@
-from celery.schedules import crontab
 from kombu import Queue
 
+# 参考地址: https://blog.csdn.net/qq_33961117/article/details/100770533
 # 配置代理人，指定代理人将任务存到哪里,这里是redis的14号库
-#broker_url = 'redis://192.168.1.202:6379/14'
+
+include = ['deploy_k8s_base_celery.tasks', 'deploy_k8s_base_celery.tasks',
+           'deploy_k8s_master_celery.tasks', 'deploy_k8s_network_celery.tasks',
+           'deploy_k8s_node_celery.tasks', 'deploy_kernel_upgrade_celery.tasks'
+           ]
+
+broker_url = 'redis://192.168.1.202:6379/14'
 # celery worker的并发数，默认是服务器的内核数目,也是命令行-c参数指定的数目
 # CELERYD_CONCURRENCY = 8
 worker_concurrency = 4
-
+result_backend = 'redis://192.168.1.202:6379/15'
 # celery worker 每次去BROKER中预取任务的数量-
 worker_prefetch_multiplier = 4
 
@@ -21,6 +27,8 @@ worker_force_execv = True
 
 # 任务发出后，经过一段时间还未收到acknowledge , 就将任务重新交给其他worker执行
 worker_disable_rate_limits = True
+
+
 
 # 读取任务结果一般性能要求不高，所以使用了可读性更好的JSON
 worker_result_serializer = "json"

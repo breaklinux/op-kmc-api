@@ -2,8 +2,8 @@
 """
 from django.http import JsonResponse
 import json
-from base.standard_respon import kmc_Response
-from deploy_k8s_network_celery.tasks import dp_k8sNetwork
+from deploy.base.standard_respon import kmc_Response
+from deploy.deploy_k8s_network_celery.tasks import dp_k8sNetwork
 
 
 def k8sNetwork(request):

@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 import json
-from base.standard_respon import kmc_Response
-from deploy_k8s_base_celery.tasks import dp_k8sBase
+from deploy.base.standard_respon import kmc_Response
+from deploy.deploy_k8s_base_celery.tasks import dp_k8sBase
 
 def k8sInit(request):
     methodResponseMsg = """{method} Method not supported""".format(method=request.method)

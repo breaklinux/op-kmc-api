@@ -1,14 +1,14 @@
-from base.ssh_channel import sshChannelManager
-from deploy_k8s_node_celecy.main import app
-
 import os
-from base.ssh_channel import sshChannelManager
-
 HERE = os.path.abspath(__file__)
 HOME_DIR = os.path.split(os.path.split(HERE)[0])[0]
 script_path = os.path.join(HOME_DIR, "deploy_k8s_network_celery")  # 获取当前path路径
 os.sys.path.append(script_path)
+base = os.path.join(HOME_DIR, "base")
+os.sys.path.append(script_path)
+os.sys.path.append(base)
 
+from main import app
+from ssh_channel import sshChannelManager
 
 @app.task(name='dp_k8sNetwork')
 def dp_k8sNetwork(pluginName, host, port, username, passwd):

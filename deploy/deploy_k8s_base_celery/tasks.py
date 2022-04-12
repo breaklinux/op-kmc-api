@@ -1,8 +1,19 @@
+import os
+
+HERE = os.path.abspath(__file__)
+HOME_DIR = os.path.split(os.path.split(HERE)[0])[0]
+script_path = os.path.join(HOME_DIR, "deploy_k8s_base_celery")  # 获取当前path路径
+base = os.path.join(HOME_DIR, "base")
+os.sys.path.append(script_path)
+os.sys.path.append(base)
+
+print("来的路径",script_path)
 # 系统级别基础配置
+
 import csv
-from base.datetime_tools import runTime, runTimeCalculate
-from base.ssh_channel import sshChannelManager
-from deploy_k8s_base_celery.main import app
+from datetime_tools import runTime, runTimeCalculate
+from ssh_channel import sshChannelManager
+from main import app
 
 # 配置K8Syum源
 def aliK8sMirror():
@@ -41,19 +52,19 @@ def setHost(hostname):
 # 获取主机名及IP地址，存入到文本
 def saveFile(hostname, ip):
     try:
-        with open('hosts.csv', 'r+', newline='', encoding='utf-8') as out:
+        with open(script_path + '/hosts.csv', 'r+', newline='', encoding='utf-8') as out:
             csv_reader = csv.reader(out)
             hosts_list = []
             for i in csv_reader:
                 if hostname == i[0] or ip == i[1]:
                     hosts_list.append(i[0])
                 else:
-                    with open('hosts.csv', 'a+', newline='', encoding='utf-8') as out:
+                    with open(script_path + '/hosts.csv', 'a+', newline='', encoding='utf-8') as out:
                         csv_write = csv.writer(out, dialect='excel')
                         dataList = [hostname, ip]
                         csv_write.writerow(dataList)
     except Exception:
-        with open('hosts.csv', 'w+', newline='', encoding='utf-8') as out:
+        with open(script_path + '/hosts.csv', 'w+', newline='', encoding='utf-8') as out:
             csv_write = csv.writer(out, dialect='excel')
             dataList = [hostname, ip]
             csv_write.writerow(dataList)
@@ -62,7 +73,7 @@ def saveFile(hostname, ip):
 # 配置/etc/hosts,需要查文本
 def setHosts():
     cmd = []
-    with open('hosts.csv', 'r', newline='', encoding='utf-8') as out:
+    with open(script_path + '/hosts.csv', 'r', newline='', encoding='utf-8') as out:
         csv_reader = csv.reader(out)
         for i in csv_reader:
             a = "sudo echo \"{0} {1}\" > /etc/hosts".format(i[1], i[0])
