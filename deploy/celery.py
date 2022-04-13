@@ -6,7 +6,7 @@ os.sys.path.append(script_path)
 from celery import Celery
 
 import config
-app = Celery('deploy_job')
+app = Celery('k8sDeployJob')
 
 # 导入celery配置
 app.config_from_object(config)

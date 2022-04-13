@@ -14,7 +14,7 @@ def dockerService(request):
         port = data.get('port')
         username = data.get('username')
         password = data.get('password')
-        logSize = data.get('logsize')
+        logSize = data.get('log_size')
         reg = data.get('registries')
         if host and port and username and password and logSize and reg:
             task_id = dp_dockerService.delay(host, port, username, password, logSize, reg)

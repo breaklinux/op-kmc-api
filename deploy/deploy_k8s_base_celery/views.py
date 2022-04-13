@@ -14,8 +14,10 @@ def k8sInit(request):
         username = data.get('username')
         password = data.get('password')
         hostname = data.get('hostname')
+        ip = data.get("ip")
+        print(data)
         if host and port and username and password and hostname:
-            task_id = dp_k8sBase.delay(host, port, username, password, hostname)
+            task_id = dp_k8sBase.delay(host, port, username, password, hostname, ip)
             msg = "异步操作-初始化.请跟进taskId进行查询结果...."
             return JsonResponse(kmc_Response(msg=msg, taskId=task_id))
     else:

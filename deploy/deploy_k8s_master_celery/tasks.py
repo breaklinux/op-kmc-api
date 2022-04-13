@@ -38,7 +38,7 @@ def joinTokenNew():
 
 # 把获取到的token存放到文本内
 def saveTokenFile(kube_join_cmd):
-    with open('./kube_join.csv', 'w+', newline='', encoding='utf-8') as out:
+    with open(script_path + '/kube_join.csv', 'w+', newline='', encoding='utf-8') as out:
         csv_write = csv.writer(out, dialect='excel')
         dataList = [kube_join_cmd]
         csv_write.writerow(dataList)
@@ -51,7 +51,7 @@ def pki():
 
 # 把获取到的Token执行加入k8s集群
 def joinMasterCluster():
-    with open('./kube_join.csv', 'r', newline='', encoding='utf-8') as out:
+    with open(script_path + '/kube_join.csv', 'r', newline='', encoding='utf-8') as out:
         csv_reader = csv.reader(out)
         cmd = ""
         for i in csv_reader:
@@ -90,7 +90,8 @@ def dp_k8sMaster(host, port, username, password, advertise_address, deploy):
         ssh_remove_exec_cmd.sshExecCommand(cmd, password)
     elif deploy == 2:
         cmd = joinMasterCluster()  # 获取join token命令后执行加入
-        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+        out = ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+        saveTokenFile(out)
         cmd = kubectlPermission()  # 配置kubectl
         ssh_remove_exec_cmd.sshExecCommand(cmd, password)
 

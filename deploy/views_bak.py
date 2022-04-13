@@ -4,6 +4,10 @@ from django.http import JsonResponse
 from deploy.base.datetime_tools import runTime,runTimeCalculate
 import paramiko
 import json
+from deploy.base.standard_request import baseHttpApi
+from django.conf import settings
+import pprint
+from deploy.base.standard_respon import kmc_Response
 
 # 配置ssh登录linux客户端
 def sshLinux(host, port, username, password, hostname, ip, logsize, registries, deploy):
@@ -96,10 +100,10 @@ def sshLinux(host, port, username, password, hostname, ip, logsize, registries, 
     return data
 
 
-def sshDeploy(request):
+def k8sDeploy(request):
     methodResponseMsg = """{method} Method not supported""".format(method=request.method)
     if request.method == "GET":
-        return JsonResponse(standardResponse(methodResponseMsg))
+        return JsonResponse(kmc_Response(methodResponseMsg))
     elif request.method == "POST":
         data = json.loads(request.body)
         host = data.get('host')
@@ -111,20 +115,29 @@ def sshDeploy(request):
         logsize = data.get('logsize')
         registries = data.get('registries')
         deploy = data.get('deploy')
+        if deploy != 1:  # 这里接收master的ip、用户名及密码
+            k8sDeployMasterMain
+            if deploy == 2:  # 执行拷贝master节点pki命令
+                pass
+        ssh_client.connect(hostname=host, port=port, username=username, password=password)
         data = sshLinux(host, port, username, password, hostname, ip, logsize, registries, deploy)
         return JsonResponse(data)
     else:
-        return JsonResponse(standardResponse(methodResponseMsg))
+        return JsonResponse(kmc_Response(methodResponseMsg))
 
 
-"""
- 1.公共返回数据格式
-"""
+def k8sDeployMasterMain(host, post, username, password, advertise_address, deploy):
+    """
+      1.api方式调用master部署init和K8S_Join master 业务功能
+     """
+    header = {'Content-Type': 'application/json'}
+    payload = {"host": host, "port": 22,
+               "username": username, "password": password,
+               "advertise_address": advertise_address,
+               "deploy": deploy
+               }
+    HttpApi = baseHttpApi(method="post", url=settings.API_DOMAIN_NAME, header=header, body=payload)
+    res = HttpApi.runMain()
+    pprint.pprint(res)
+    return res
 
-
-def standardResponse(msg=None, token=None):
-    if not token:
-        data = {"code": 1, "message": msg, "data": {"token": "", "state": "false"}}
-    else:
-        data = {"code": 0, "message": msg, "data": {"token": token, "state": "true"}}
-    return data

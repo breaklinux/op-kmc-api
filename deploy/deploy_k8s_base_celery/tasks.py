@@ -7,7 +7,6 @@ base = os.path.join(HOME_DIR, "base")
 os.sys.path.append(script_path)
 os.sys.path.append(base)
 
-print("来的路径",script_path)
 # 系统级别基础配置
 
 import csv
@@ -115,6 +114,7 @@ EOF
 def dp_k8sBase(host, port, username, password, hostname):
     ssh_remove_exec_cmd = sshChannelManager(host, port, username)
     cmd = []
+    cmd.append(saveFile(hostname,ip))
     cmd.append(aliK8sMirror())
     cmd.append(stopSecurity())
     cmd.append(stopSwap())

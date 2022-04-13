@@ -21,7 +21,7 @@ def k8sMaster(request):
         deployLit = [1, 2]
         if deploy in deployLit:
             if host and port and username and password and advertise_address:
-                task_id = dp_k8sMaster.delay(host, port, username, password, advertise_address,deploy)
+                task_id = dp_k8sMaster.delay(host, port, username, password, advertise_address, deploy)
                 if deploy == 1:
                     msg = "异步操作-K8S_Init.请跟进taskId进行查询结果...."
                 else:

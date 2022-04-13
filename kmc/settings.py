@@ -36,6 +36,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+"""
+1.部署模块api访问地址 (跟进运行程序的访问地址进行配置APi)
+"""
+DEPLOY_K8S_MASTER_API = "http://0.0.0.0/k8s_master"
+DEPLOY_K8S_NODE_API = "http://0.0.0.0/k8s_node"
+DEPLOY_K8S_BASE_API = "http://0.0.0.0/k8s_init"
+DEPLOY_OS_UPGRADE_API = "http://0.0.0.0/os_upgrade"
+DEPLOY_DOCKER_API = "http://0.0.0.0/deploy_docker"
+DEPLOY_K8S_NETWORK_API = "http://0.0.0.0/k8s_cni"
+
+
 
 # Application definition
 
