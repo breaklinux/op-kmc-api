@@ -1,4 +1,3 @@
-from deploy_old import base, docker, master, node
 import server_resource
 from django.http import JsonResponse
 import paramiko
