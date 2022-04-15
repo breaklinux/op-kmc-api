@@ -2,15 +2,17 @@ from kombu import Queue
 
 # 参考地址: https://blog.csdn.net/qq_33961117/article/details/100770533
 # 配置代理人，指定代理人将任务存到哪里,这里是redis的14号库
-
-broker_url = 'redis://192.168.1.202:6379/14'
+broker_url = 'redis://192.168.1.200:6379/14'
 # celery worker的并发数，默认是服务器的内核数目,也是命令行-c参数指定的数目
 # CELERYD_CONCURRENCY = 8
 worker_concurrency = 4
-result_backend = 'redis://192.168.1.202:6379/15'
+result_backend = 'redis://192.168.1.200:6379/15'
 # celery worker 每次去BROKER中预取任务的数量-
 worker_prefetch_multiplier = 4
-
+include = ['deploy_k8s_base_celery.tasks', 'deploy_k8s_base_celery.tasks',
+           'deploy_k8s_master_celery.tasks', 'deploy_k8s_network_celery.tasks',
+           'deploy_k8s_node_celery.tasks', 'deploy_kernel_upgrade_celery.tasks'
+           ]
 # 每个worker执行了多少任务就会死掉，默认是无限的,释放内存
 worker_max_tasks_per_child = 50
 

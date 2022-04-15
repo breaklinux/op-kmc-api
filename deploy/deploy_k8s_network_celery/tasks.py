@@ -47,6 +47,10 @@ def dp_k8sNetwork(pluginName, host, port, username, passwd):
         result = scpChannel.remoteHostScp(passwd, local_path, remote_path)
         if result.get("msg") == "success":
             cmd = "kubectl apply -f {remote_filepath} ".format(remote_filepath=remote_path)
-            scpChannel.sshExecCommand(cmd, passwd)
+            try:
+                scpChannel.sshExecCommand(cmd, passwd)
+                return {"code": 0, "message": "k8s网络插件部署成功"}
+            except Exception as e:
+                return {"code": 1, "message": "k8s网络插件部署失败+{status}".format(status=str(e))}
         else:
             return result.get("info")

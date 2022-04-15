@@ -6,7 +6,6 @@ base = os.path.join(HOME_DIR, "base")
 os.sys.path.append(script_path)
 os.sys.path.append(base)
 from .main import app
-from datetime_tools import runTime, runTimeCalculate
 from ssh_channel import sshChannelManager
 app.autodiscover_tasks()
 # 升级操作系统内核版本.便于后期新增组件和ebpf cni插件功能
@@ -106,27 +105,6 @@ uninstall_old_packages() {
 }
 """
 
-# def sshCmd(ssh_client, c):
-#     print("执行命令:{0}".format(c))
-#     stdin, stdout, stderr = ssh_client.exec_command(c, get_pty=True)
-#     if not stdout is None:
-#         data = stdout.read()
-#         data = data.decode("utf-8")
-#         print("命令执行结果：" + str(data))
-#         return data
-#     if not stderr is None:
-#         data = stderr.read()
-#         data = data.decode("utf-8")
-#         print("命令执行错误：" + str(data))
-#         return data.read()
-#
-#
-# def sshLinux(host, port, username, password):
-#     ssh_client = paramiko.SSHClient()
-#     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-#     ssh_client.connect(hostname=host, port=port, username=username, password=password)
-#     return ssh_client
-
 
 # 升级内核主入口
 @app.task(name='dp_upgradeKernel')
@@ -143,9 +121,9 @@ def dp_upgradeKernel(host, port, username, password):
     cmd.append(listNewKernels())
     cmd.append(uninstallOldKernel())
     print("操作系统内核更新升级中......")
-    startUpgradeTime = runTime()
-    for upgrade in cmd:
-        ssh_remove_exec_cmd.sshExecCommand(upgrade, password)
-    endUpgradeTime = runTime()
-    runtime = runTimeCalculate("操作系统内核更新升级中耗时: ", endUpgradeTime, startUpgradeTime)
-    return {"code": 0, "message": "操作系统内核更新升级成功", "runtime": str(runtime) + " s"}
+    try:
+        for upgrade in cmd:
+            ssh_remove_exec_cmd.sshExecCommand(upgrade, password)
+        return {"code": 0, "message": "操作系统内核更新升级成功"}
+    except Exception as e:
+        return {"code": 1, "message": "操作系统内核更新失败原因+{status}".format(status=str(e))}

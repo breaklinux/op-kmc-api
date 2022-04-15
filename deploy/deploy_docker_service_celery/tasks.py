@@ -60,17 +60,18 @@ def reload():
 
 @app.task(name='dp_dockerService')
 def dp_dockerService(host, port, username, password, logsize, registries):
-    ssh_remove_exec_cmd = sshChannelManager(host, port, username)
-    cmd = []
-    cmd.append(dependentPackages())
-    cmd.append(aliDockerMirror())
-    cmd.append(yumDocker())
-    cmd.append(daemon(logsize, registries))
-    cmd.append(reload())
-    print("k8s Docker服务部署中......")
-    startInitTime = runTime()
-    for docker in cmd:
-        ssh_remove_exec_cmd.sshExecCommand(docker, password)
-    endInitTime = runTime()
-    runtime = runTimeCalculate("k8s Docker服务部署中耗时: ", endInitTime, startInitTime)
-    return {"code": 0, "message": "k8s Docker服务部署成功", "runtime": str(runtime) + " s"}
+    try:
+        ssh_remove_exec_cmd = sshChannelManager(host, port, username)
+        cmd = []
+        cmd.append(dependentPackages())
+        cmd.append(aliDockerMirror())
+        cmd.append(yumDocker())
+        cmd.append(daemon(logsize, registries))
+        cmd.append(reload())
+        print("k8s Docker服务部署中......")
+        for docker in cmd:
+            ssh_remove_exec_cmd.sshExecCommand(docker, password)
+        return {"code": 0, "message": "k8s Docker服务部署成功", "runtime": str(runtime) + " s"}
+    except Exception as e:
+        print(e)
+        return {"code": 1, "message": "k8s Docker服务部署失败原因+{status}".format(status=str(e))}

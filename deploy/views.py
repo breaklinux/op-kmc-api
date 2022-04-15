@@ -1,4 +1,3 @@
-import server_resource
 from django.http import JsonResponse
 import paramiko
 import json
@@ -26,7 +25,6 @@ class k8sDeployCluster():
         payload = {"host": self.host, "port": self.port, "username": self.username, "password": self.password}
         HttpApi = baseHttpApi(method="post", url=settings.DEPLOY_OS_UPGRADE_API, header=header, body=payload)
         res = HttpApi.runMain()
-        pprint.pprint(res)
         return res
 
     def k8sDeployBaseMain(self, hostname, ip):
@@ -57,14 +55,14 @@ class k8sDeployCluster():
         pprint.pprint(res)
         return res
 
-    def k8sDeployMasterMain(self, deploy):
+    def k8sDeployMasterMain(self, deploy, ip):
         """
           1.api方式调用master部署init和K8S_Join master 业务功能
          """
         header = {'Content-Type': 'application/json'}
         payload = {"host": self.host, "port": self.port,
                    "username": self.username, "password": self.password,
-                   "ip": self.ip,
+                   "ip": ip,
                    "deploy": deploy
                    }
         HttpApi = baseHttpApi(method="post", url=settings.DEPLOY_K8S_MASTER_API, header=header, body=payload)
@@ -140,7 +138,7 @@ def k8sDeploy(request):
         deploy = data.get('deploy')
         k8s_instance = k8sDeployCluster(host=host, port=port, username=username, password=password)
         if deploy != 1:  # 这里接收master的ip、用户名及密码
-            k8s_instance.k8sDeployMasterMain(deploy)
+            k8s_instance.k8sDeployMasterMain(deploy, ip)
             if deploy == 2:  # 执行拷贝master节点pki命令
                 pass
         if deploy == 1 or deploy == 2 or deploy == 3:
@@ -154,14 +152,14 @@ def k8sDeploy(request):
             k8s_instance.k8sDeployBaseMain(hostname, ip)
 
             print("docker环境部署中......")
-            k8s_instance.dockerServiceMain(logsize, registries)
+            k8s_instance.dockerServiceMain(log_size, registries)
 
         if deploy == 1 or deploy == 2:
             """
             # 安装master(deploy：1为需要init，deploy：2为加入master节点)
             """
             print("master环境部署中......")
-            k8s_instance.k8sDeployMasterMain(deploy)
+            k8s_instance.k8sDeployMasterMain(deploy,ip)
             k8s_instance.k8sDeployNetworkMain(cni_name)
 
         if deploy == 3:

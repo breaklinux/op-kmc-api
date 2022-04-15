@@ -53,9 +53,19 @@ def dp_k8sNode(host, port, username, password, apiServerIp, token, caCertHash):
     cmd_list.append(yumKube())
     if apiServerIp and token and caCertHash:
         cmd_list.append(joinNodeToasterCluster(apiServerIp, token, caCertHash))
-        for node in cmd_list:
-            ssh_remove_exec_cmd.sshExecCommand(node, password)
+        try:
+            for node in cmd_list:
+                ssh_remove_exec_cmd.sshExecCommand(node, password)
+            return {"code": 0, "message": "node环境部署成功"}
+        except Exception as e:
+            return {"code": 1, "message": "node环境部署失败+{status}".format(status=str(e))}
     else:
         cmd_list.append(joinMasterCluster())
-        for node in cmd_list:
-            ssh_remove_exec_cmd.sshExecCommand(node, password)
+        try:
+            for node in cmd_list:
+                ssh_remove_exec_cmd.sshExecCommand(node, password)
+            return {"code": 0, "message": "node环境部署成功"}
+        except Exception as e:
+            print(e)
+            return {"code": 1, "message": "node环境部署失败+{status}".format(status=str(e))}
+

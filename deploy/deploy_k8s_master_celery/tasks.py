@@ -1,5 +1,6 @@
 # master安装
 import os
+
 HERE = os.path.abspath(__file__)
 HOME_DIR = os.path.split(os.path.split(HERE)[0])[0]
 script_path = os.path.join(HOME_DIR, "deploy_k8s_master_celery")  # 获取当前path路径
@@ -79,19 +80,28 @@ def dp_k8sMaster(host, port, username, password, advertise_address, deploy):
     cmd = yumKube()  # 部署
     ssh_remove_exec_cmd.sshExecCommand(cmd, password)
     if deploy == 1:
-        cmd = kubeInit(advertise_address)  # 初始化
-        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
-        cmd = joinToken()  # 获取jointoken命令
-        out = ssh_remove_exec_cmd.sshExecCommand(cmd, password)
-        saveTokenFile(out)  # 存入本地
-        cmd = kubectlPermission()  # 配置kubectl
-        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
-        cmd = flannel()  # 部署flannel #走api接口
-        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+        try:
+            cmd = kubeInit(advertise_address)  # 初始化
+            ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+            cmd = joinToken()  # 获取jointoken命令
+            out = ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+            saveTokenFile(out)  # 存入本地
+            cmd = kubectlPermission()  # 配置kubectl
+            ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+            cmd = flannel()  # 部署flannel #走api接口
+            ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+            return {"code": 0, "message": "k8s master Init部署成功"}
+        except Exception as e:
+            print(e)
+            return {"code": 1, "message": "k8s master Init部署失败原因+{status}".format(status=str(e))}
     elif deploy == 2:
-        cmd = joinMasterCluster()  # 获取join token命令后执行加入
-        out = ssh_remove_exec_cmd.sshExecCommand(cmd, password)
-        saveTokenFile(out)
-        cmd = kubectlPermission()  # 配置kubectl
-        ssh_remove_exec_cmd.sshExecCommand(cmd, password)
-
+        try:
+            cmd = joinMasterCluster()  # 获取join token命令后执行加入
+            out = ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+            saveTokenFile(out)
+            cmd = kubectlPermission()  # 配置kubectl
+            ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+            return {"code": 0, "message": "k8s join新master部署成功"}
+        except Exception as e:
+            print(e)
+            return {"code": 1, "message": "k8s k8s join新master失败原因+{status}".format(status=str(e))}
