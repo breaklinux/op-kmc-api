@@ -17,13 +17,18 @@ def dockerService(request):
                 return JsonResponse(result)
             elif async_result.status == 'PENDING':
                 msg = "任务还在等待队列中......"
+                return JsonResponse({"code": 1, "msg": msg})
+
             elif async_result.failed():
                 msg = "任务执行失败......"
+                return JsonResponse({"code": 1, "msg": msg})
             elif async_result.status == 'RETRY':
                 msg = "任务异常后正在重试....."
+                return JsonResponse({"code": 1, "msg": msg})
+
             elif async_result.status == 'STARTED':
                 msg = '任务已经开始执行执行中....'
-            return JsonResponse({"code": 1, "msg": msg})
+                return JsonResponse({"code": 1, "msg": msg})
         else:
             methodResponseMsg = "没有任务task_id,不能进行操作"
             return JsonResponse(kmc_Response(methodResponseMsg))

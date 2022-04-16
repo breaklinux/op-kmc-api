@@ -9,7 +9,6 @@ base = os.path.join(HOME_DIR, "base")
 os.sys.path.append(script_path)
 os.sys.path.append(base)
 
-from datetime_tools import runTime, runTimeCalculate
 from ssh_channel import sshChannelManager
 from .main import app
 
@@ -71,7 +70,7 @@ def dp_dockerService(host, port, username, password, logsize, registries):
         print("k8s Docker服务部署中......")
         for docker in cmd:
             ssh_remove_exec_cmd.sshExecCommand(docker, password)
-        return {"code": 0, "message": "k8s Docker服务部署成功", "runtime": str(runtime) + " s"}
+        return {"code": 0, "message": "k8s Docker服务部署成功"}
     except Exception as e:
         print(e)
         return {"code": 1, "message": "k8s Docker服务部署失败原因+{status}".format(status=str(e))}
