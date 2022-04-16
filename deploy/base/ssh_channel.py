@@ -39,7 +39,7 @@ class sshChannelManager():
             ssh_client = self.sshClientPasswdChannel(password)
         else:
             ssh_client = self.sshClientPrivateKeyChannel(private_key_path)
-
+        print(self.commandResult(ssh_client, command))
         return self.commandResult(ssh_client, command)
 
     def commandResult(self, ssh_client, command):
@@ -54,6 +54,7 @@ class sshChannelManager():
             data = data.decode("utf-8")
             print("命令执行结果：" + str(data))
             return data
+
         if not stderr is None:
             data = stderr.read()
             data = data.decode("utf-8")

@@ -51,6 +51,7 @@ def setHost(hostname):
 # 获取主机名及IP地址，存入到文本
 def saveFile(hostname, ip):
     try:
+        print(script_path + '/hosts.csv')
         with open(script_path + '/hosts.csv', 'r+', newline='', encoding='utf-8') as out:
             csv_reader = csv.reader(out)
             hosts_list = []
@@ -111,23 +112,25 @@ EOF
 
 # k8s 环境init初始化
 @app.task(name='dp_k8sBase')
-def dp_k8sBase(host, port, username, password, hostname):
-    try:
-        ssh_remove_exec_cmd = sshChannelManager(host, port, username)
-        cmd = []
-        cmd.append(saveFile(hostname,ip))
-        cmd.append(aliK8sMirror())
-        cmd.append(stopSecurity())
-        cmd.append(stopSwap())
-        cmd.append(setHost(hostname))
-        cmd.append(setHosts())
-        cmd.append(setNtp())
-        cmd.append(iptablesBridge())
-        cmd.append(setIpvs())
-        print("k8s环境系统初始化中......")
-        for init in cmd:
-            ssh_remove_exec_cmd.sshExecCommand(init, password)
-        return {"code": 0, "message": "k8s环境系统初始化成功"}
-    except Exception as e:
-        return {"code": 1, "message": "k8s环境系统初始化失败原因+{status}".format(status=str(e))}
+def dp_k8sBase(host, port, username, password, hostname, ip):
+    ssh_remove_exec_cmd = sshChannelManager(host, port, username)
+    cmd = []
+    cmd.append(saveFile(hostname, ip))
+    cmd.append(aliK8sMirror())
+    cmd.append(stopSecurity())
+    cmd.append(stopSwap())
+    cmd.append(setHost(hostname))
+    cmd.append(setHosts())
+    cmd.append(setNtp())
+    cmd.append(iptablesBridge())
+    cmd.append(setIpvs())
+    print("k8s环境系统初始化中......")
+    print(cmd)
+    for init in cmd:
+        print("执行的命令")
+        ssh_remove_exec_cmd.sshExecCommand(init, password)
+    return {"code": 0, "message": "k8s环境系统初始化成功"}
+    # except Exception as e:
+    #     print(e)
+    #     return {"code": 1, "message": "k8s环境系统初始化失败原因"}
 

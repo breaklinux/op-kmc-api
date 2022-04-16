@@ -41,8 +41,8 @@ def kernelUpgrade(request):
             return JsonResponse({"code": 1, "msg": msg})
         else:
             methodResponseMsg = "没有任务task_id,不能进行操作"
-            return JsonResponse(kmc_Response(methodResponseMsg))
-        return JsonResponse(kmc_Response(methodResponseMsg))
+            return JsonResponse({"code": 1, "msg": methodResponseMsg})
+        return JsonResponse({"code": 1, "msg": methodResponseMsg})
 
     elif request.method == "POST":
         data = json.loads(request.body)

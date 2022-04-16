@@ -5,6 +5,7 @@ from deploy.base.standard_request import baseHttpApi
 from django.conf import settings
 import pprint
 from deploy.base.standard_respon import kmc_Response
+import datetime
 
 
 class k8sDeployCluster():
@@ -25,6 +26,16 @@ class k8sDeployCluster():
         payload = {"host": self.host, "port": self.port, "username": self.username, "password": self.password}
         HttpApi = baseHttpApi(method="post", url=settings.DEPLOY_OS_UPGRADE_API, header=header, body=payload)
         res = HttpApi.runMain()
+        return res
+
+    def getIdMain(self, taskId):
+        """
+        1.api方式查询内核升级状态
+       """
+        header = {'Content-Type': 'application/json'}
+        payload = {"task_id": taskId}
+        HttpApi = baseHttpApi(method="get", url=settings.DEPLOY_OS_UPGRADE_API, header=header, body=payload)
+        res = HttpApi.sendGet()
         return res
 
     def k8sDeployBaseMain(self, hostname, ip):
@@ -121,6 +132,11 @@ def resourceSys():
 
 
 def k8sDeploy(request):
+    """
+    1.获取api参数进行部署k8s主逻辑
+    2.部署过程20分钟如果没有完成终止 部署过程
+    3.通过各个模块api访问调用处理.
+    """
     methodResponseMsg = """{method} Method not supported""".format(method=request.method)
     if request.method == "GET":
         return JsonResponse(kmc_Response(methodResponseMsg))
@@ -146,20 +162,70 @@ def k8sDeploy(request):
             # 内核升级-基础配置-Docker 环境部署(1、2、3都走)
             """
             print("系统内核升级中......")
-            k8s_instance.osUpgradeMain()
+            endTime = datetime.datetime.now() + datetime.timedelta(minutes=10)
+            resultTaskId = k8s_instance.osUpgradeMain()
+            if resultTaskId.get("code") == 0 and resultTaskId.get("task_id"):
+                while True:
+                    resultCeleryStatus = k8s_instance.getIdMain(resultTaskId.get("task_id"))
+                    if resultCeleryStatus['code'] == 0:
+                        print('os内核升级成功--下一步进行k8s基础环境初始化', resultCeleryStatus)
+                        break
+                    else:
+                        print('os内核升级还在处理中-循环查询状态中请稍后....10分钟无响应操作失败')
+                        if datetime.datetime.now() >= endTime:
+                            msg = "系统内核升级失败--10分钟没有完成.请升级机器配置或者检查原因"
+                            return JsonResponse({"code": 1, "msg": msg})
+            else:
+                msg = "系统内核升级Api操作异常请进行检查....."
+                return JsonResponse({"code": 1, "msg": msg})
 
             print("系统基本配置及参数优化中......")
-            k8s_instance.k8sDeployBaseMain(hostname, ip)
+            baseEndTime = datetime.datetime.now() + datetime.timedelta(minutes=2)
+            resultBaseTaskId = k8s_instance.k8sDeployBaseMain(hostname, ip)
+            print("k8s系统基础配置返回值", resultBaseTaskId)
+            if resultBaseTaskId.get("code") == 0 and resultBaseTaskId.get("task_id"):
+                while True:
+                    resultBaseCeleryStatus = k8s_instance.getIdMain(resultTaskId.get("task_id"))
+                    if resultBaseCeleryStatus['code'] == 0:
+                        print('k8s基础环境初始化--下一步进行Docker服务部署', resultBaseCeleryStatus)
+                        break
+                    else:
+                        print('k8s基础环境初始化-循环查询状态中请稍后....2分钟无响应操作失败')
+                        if datetime.datetime.now() >= endTime:
+                            msg = "k8s基础环境初始化--2分钟没有完成.请升级机器配置或者检查具体原因"
+                            return JsonResponse({"code": 1, "msg": msg})
+            else:
+                msg = "k8s基础环境初始化异常请进行检查....."
+                return JsonResponse({"code": 1, "msg": msg})
+
+            return JsonResponse({"code": 1, "msg": "断点调试k8s基础环境初始化"})
 
             print("docker环境部署中......")
-            k8s_instance.dockerServiceMain(log_size, registries)
+            dockerEndTime = datetime.datetime.now() + datetime.timedelta(minutes=1)
+
+            resultDockerTaskId = k8s_instance.dockerServiceMain(log_size, registries)
+            print("docker环境基础配置返回值", resultDockerTaskId)
+            if resultDockerTaskId.get("code") == 0 and resultDockerTaskId.get("task_id"):
+                while True:
+                    resultDockerCeleryStatus = k8s_instance.getIdMain(resultDockerTaskId.get("task_id"))
+                    if resultDockerCeleryStatus['code'] == 0:
+                        print('k8s Docker环境部署成功--下一步进行Master Init', resultBaseCeleryStatus)
+                        break
+                    else:
+                        print('k8s  Docker环境部署成功-循环查询状态中请稍后....1分钟无响应操作失败')
+                        if datetime.datetime.now() >= endTime:
+                            msg = "k8s Docker环境部失败--1分钟没有完成.请升级机器配置或者检查具体原因"
+                            return JsonResponse({"code": 1, "msg": msg})
+            else:
+                msg = "k8s Docker环境部署异常请进行检查....."
+                return JsonResponse({"code": 1, "msg": msg})
 
         if deploy == 1 or deploy == 2:
             """
             # 安装master(deploy：1为需要init，deploy：2为加入master节点)
             """
             print("master环境部署中......")
-            k8s_instance.k8sDeployMasterMain(deploy,ip)
+            k8s_instance.k8sDeployMasterMain(deploy, ip)
             k8s_instance.k8sDeployNetworkMain(cni_name)
 
         if deploy == 3:

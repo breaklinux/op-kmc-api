@@ -6,7 +6,7 @@ class baseHttpApi():
     """
     1.初始化参数
     """
-    def __init__(self, method, url, header=None, body=None, timeout=300):
+    def __init__(self, method, url, header=None, body=None, timeout=30):
         self.url = url
         self.header = header
         self.body = body

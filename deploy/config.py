@@ -49,3 +49,5 @@ task_default_routing_key = 'default'
 
 # 设置时区，默认UTC
 timezone = 'Asia/Shanghai'
+TIMEZONE = 'Asia/Shanghai'
+
