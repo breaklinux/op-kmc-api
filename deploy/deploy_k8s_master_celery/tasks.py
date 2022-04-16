@@ -1,5 +1,6 @@
 # master安装
 import os
+import csv
 
 HERE = os.path.abspath(__file__)
 HOME_DIR = os.path.split(os.path.split(HERE)[0])[0]
@@ -10,6 +11,7 @@ os.sys.path.append(base)
 from .main import app
 from datetime_tools import runTime, runTimeCalculate
 from ssh_channel import sshChannelManager
+from deploy.views import k8sDeployCluster
 
 
 # 安装kubeadm、kubelet、kubectl，并设置开机自启
@@ -60,21 +62,20 @@ def joinMasterCluster():
         cmd = str(cmd).replace("[", "").replace("]", "").replace(",", ";").replace("'", "").replace("\"", "") + " --control-plane"
         return cmd
 
+# 安装插件
+def cniPlugin():
+    cmd = "sudo kubectl --kubeconfig=//etc/kubernetes/admin.conf apply -f /tmp/*.yaml && sudo rm -f /tmp/*.yaml"
+    return cmd
 
 # 配置kubectl认证权限，使用
 def kubectlPermission():
-    cmd = "mkdir -p $HOME/.kube;sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config;sudo chown $(id -u):$(id -g) $HOME/.kube/config"
+    cmd="mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config && echo 'kubectl add home success' "
     return cmd
 
-
-# 部署flannel
-def flannel():
-    cmd = "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
-    return cmd
 
 
 @app.task(name='dp_k8sMaster')
-def dp_k8sMaster(host, port, username, password, advertise_address, deploy):
+def dp_k8sMaster(host, port, username, password, advertise_address, deploy, cni_name):
     print("master环境部署中......")
     ssh_remove_exec_cmd = sshChannelManager(host, port, username)
     cmd = yumKube()  # 部署
@@ -86,14 +87,15 @@ def dp_k8sMaster(host, port, username, password, advertise_address, deploy):
             cmd = joinToken()  # 获取jointoken命令
             out = ssh_remove_exec_cmd.sshExecCommand(cmd, password)
             saveTokenFile(out)  # 存入本地
+            cniCmd = cniPlugin()  # 部署cni 走文件
+            ssh_remove_exec_cmd.sshExecCommand(cniCmd, password)
             cmd = kubectlPermission()  # 配置kubectl
-            ssh_remove_exec_cmd.sshExecCommand(cmd, password)
-            cmd = flannel()  # 部署flannel #走api接口
             ssh_remove_exec_cmd.sshExecCommand(cmd, password)
             return {"code": 0, "message": "k8s master Init部署成功"}
         except Exception as e:
             print(e)
             return {"code": 1, "message": "k8s master Init部署失败原因+{status}".format(status=str(e))}
+
     elif deploy == 2:
         try:
             cmd = joinMasterCluster()  # 获取join token命令后执行加入

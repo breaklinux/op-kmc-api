@@ -201,16 +201,33 @@ def k8sDeploy(request):
                 msg = "k8s Docker环境部署异常请进行检查....."
                 return JsonResponse({"code": 1, "msg": msg})
 
-            return JsonResponse({"code": 1, "msg": "断点调试k8sDocker部署"})
+
 
         if deploy == 1 or deploy == 2:
             """
             # 安装master(deploy：1为需要init，deploy：2为加入master节点)
             """
             print("master环境部署中......")
-            k8s_instance.k8sDeployMasterMain(deploy, ip)
-            k8s_instance.k8sDeployNetworkMain(cni_name)
-
+            masterEndTime = datetime.datetime.now() + datetime.timedelta(minutes=5)
+            data = k8s_instance.k8sDeployNetworkMain(cni_name)
+            print(data)
+            resultMasterTaskId = k8s_instance.k8sDeployMasterMain(deploy, ip)
+            print(resultMasterTaskId)
+            if resultMasterTaskId.get("code") == 0 and resultMasterTaskId.get("task_id"):
+                while True:
+                    resultMasterCeleryStatus = k8s_instance.getIdMain(resultMasterTaskId.get("task_id"))
+                    if resultMasterCeleryStatus['code'] == 0:
+                        print('k8s master角色部署', resultMasterCeleryStatus)
+                        break
+                    else:
+                        print('k8s master角色部署还在处理中-循环查询状态中请稍后....5分钟无响应操作失败')
+                        if datetime.datetime.now() >= masterEndTime:
+                            msg = "k8s master角色部署失败--5分钟没有完成.请升级机器配置或者检查原因"
+                            return JsonResponse({"code": 1, "msg": msg})
+            else:
+                msg = "master角色部署Api操作异常请进行检查....."
+                return JsonResponse({"code": 1, "msg": msg})
+        return JsonResponse({"code": 1, "msg": "断点调试k8s 角色部署"})
         if deploy == 3:
             """
             # 安装node(deploy：3为node节点)
