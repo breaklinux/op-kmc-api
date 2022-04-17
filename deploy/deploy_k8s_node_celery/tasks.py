@@ -9,7 +9,7 @@ os.sys.path.append(script_path)
 base = os.path.join(HOME_DIR, "base")
 os.sys.path.append(base)
 
-master_token_path = os.path.join(HOME_DIR, "deploy_k8s_node_celery")  # 获取当前Master目录下路径
+master_token_path = os.path.join(HOME_DIR, "deploy_k8s_master_celery")  # 获取当前Master目录下路径
 os.sys.path.append(master_token_path)
 
 # node安装
@@ -21,7 +21,7 @@ from ssh_channel import sshChannelManager
 
 # 安装kubelet、kubeadm
 def yumKube():
-    cmd = "sudo yum install -y kubelet-1.23.5-0 kubeadm-1.23.5-0;systemctl enable kubelet.service"
+    cmd = "sudo rpm -qa |grep -E 'kubelet|kubeadm|kubectl' |xargs rpm -e; sudo yum install -y kubelet-1.23.5-0  kubectl-1.23.5-0 kubeadm-1.23.5-0;systemctl enable kubelet.service"
     return cmd
 
 
@@ -32,6 +32,7 @@ def joinMasterCluster():
         cmd = ""
         for i in csv_reader:
             cmd += str(i)
+        print(i)
         cmd = str(cmd).replace("[", "").replace("]", "").replace(",", ";").replace("'", "")
         return cmd
 

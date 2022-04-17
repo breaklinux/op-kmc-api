@@ -117,9 +117,9 @@ def dp_upgradeKernel(host, port, username, password):
     cmd.append(list_kernel())
     cmd.append(installNewKernel())
     cmd.append(buildGrub())
-    cmd.append(rebootSystem())
+    #cmd.append(rebootSystem())
     cmd.append(listNewKernels())
-    cmd.append(uninstallOldKernel())
+    #cmd.append(uninstallOldKernel())
     print("操作系统内核更新升级中......")
     try:
         for upgrade in cmd:

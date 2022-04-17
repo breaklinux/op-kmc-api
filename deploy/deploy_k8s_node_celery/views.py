@@ -38,7 +38,7 @@ def k8sNode(request):
         api_server_address = data.get('api_server_ip')
         cluster_token = data.get('cluster_token')
         caCertHash = data.get('ca_cert_hash')
-        if host and port and username and password and api_server_address and cluster_token and caCertHash:
+        if host and port and username and password:
             task_id = dp_k8sNode.delay(host, port, username, password, api_server_address, cluster_token, caCertHash)
             msg = "异步操作-添加k8s_node节点.请跟进taskId进行查询结果...."
             return JsonResponse(kmc_Response(msg=msg, taskId=task_id))

@@ -81,7 +81,7 @@ class k8sDeployCluster():
         pprint.pprint(res)
         return res
 
-    def k8sDeployNetworkMain(self, cni_name="cilium"):
+    def k8sDeployNetworkMain(self, cni_name="flannel"):
         """
         1.api方式调用部署k8s cni 网络插件业务功能
         """
@@ -134,16 +134,12 @@ def k8sDeploy(request):
         cni_name = data.get('cni_name')
         deploy = data.get('deploy')
         k8s_instance = k8sDeployCluster(host=host, port=port, username=username, password=password)
-        if deploy != 1:  # 这里接收master的ip、用户名及密码
-            k8s_instance.k8sDeployMasterMain(deploy, ip)
-            if deploy == 2:  # 执行拷贝master节点pki命令
-                pass
         if deploy == 1 or deploy == 2 or deploy == 3:
             """
-            # 内核升级-基础配置-Docker 环境部署(1、2、3都走)
-            """
+            # # 内核升级-基础配置-Docker 环境部署(1、2、3都走)
+            # """
             print("系统内核升级中......")
-            endTime = datetime.datetime.now() + datetime.timedelta(minutes=10)
+            endTime = datetime.datetime.now() + datetime.timedelta(minutes=20)
             resultTaskId = k8s_instance.osUpgradeMain()
             if resultTaskId.get("code") == 0 and resultTaskId.get("task_id"):
                 while True:
@@ -152,14 +148,13 @@ def k8sDeploy(request):
                         print('os内核升级成功--下一步进行k8s基础环境初始化', resultCeleryStatus)
                         break
                     else:
-                        print('os内核升级还在处理中-循环查询状态中请稍后....10分钟无响应操作失败')
+                        print('os内核升级还在处理中-循环查询状态中请稍后....20分钟无响应操作失败')
                         if datetime.datetime.now() >= endTime:
-                            msg = "系统内核升级失败--10分钟没有完成.请升级机器配置或者检查原因"
+                            msg = "系统内核升级失败--20分钟没有完成.请升级机器配置或者检查原因"
                             return JsonResponse({"code": 1, "msg": msg})
             else:
                 msg = "系统内核升级Api操作异常请进行检查....."
                 return JsonResponse({"code": 1, "msg": msg})
-
             print("系统基本配置及参数优化中......")
             baseEndTime = datetime.datetime.now() + datetime.timedelta(seconds=15)
             resultBaseTaskId = k8s_instance.k8sDeployBaseMain(hostname, ip)
@@ -178,11 +173,8 @@ def k8sDeploy(request):
             else:
                 msg = "k8s基础环境初始化异常请进行检查....."
                 return JsonResponse({"code": 1, "msg": msg})
-
-            return JsonResponse({"code": 1, "msg": "断点调试k8s基础环境初始化"})
-
             print("docker环境部署中......")
-            dockerEndTime = datetime.datetime.now() + datetime.timedelta(minutes=8)
+            dockerEndTime = datetime.datetime.now() + datetime.timedelta(minutes=10)
 
             resultDockerTaskId = k8s_instance.dockerServiceMain(log_size, registries)
             print("docker环境基础配置返回值", resultDockerTaskId)
@@ -193,46 +185,60 @@ def k8sDeploy(request):
                         print('k8s Docker环境部署成功--下一步进行Master Init', resultDockerCeleryStatus)
                         break
                     else:
-                        print('k8s  Docker环境部署成功-循环查询状态中请稍后....8分钟无响应操作失败')
+                        print('k8s  Docker环境部署成功-循环查询状态中请稍后....10分钟无响应操作失败')
                         if datetime.datetime.now() >= dockerEndTime:
-                            msg = "k8s Docker环境部失败--8分钟没有完成.请升级机器配置或者检查具体原因"
+                            msg = "k8s Docker环境部失败--10分钟没有完成.请升级机器配置或者检查具体原因"
                             return JsonResponse({"code": 1, "msg": msg})
             else:
                 msg = "k8s Docker环境部署异常请进行检查....."
                 return JsonResponse({"code": 1, "msg": msg})
-
-
 
         if deploy == 1 or deploy == 2:
             """
             # 安装master(deploy：1为需要init，deploy：2为加入master节点)
             """
             print("master环境部署中......")
-            masterEndTime = datetime.datetime.now() + datetime.timedelta(minutes=5)
-            data = k8s_instance.k8sDeployNetworkMain(cni_name)
-            print(data)
+            masterEndTime = datetime.datetime.now() + datetime.timedelta(minutes=10)
             resultMasterTaskId = k8s_instance.k8sDeployMasterMain(deploy, ip)
             print(resultMasterTaskId)
             if resultMasterTaskId.get("code") == 0 and resultMasterTaskId.get("task_id"):
                 while True:
                     resultMasterCeleryStatus = k8s_instance.getIdMain(resultMasterTaskId.get("task_id"))
                     if resultMasterCeleryStatus['code'] == 0:
-                        print('k8s master角色部署', resultMasterCeleryStatus)
+                        print('k8s master角色部署.下一步进行cni网络部署', resultMasterCeleryStatus)
                         break
                     else:
-                        print('k8s master角色部署还在处理中-循环查询状态中请稍后....5分钟无响应操作失败')
+                        print('k8s master角色部署还在处理中-循环查询状态中请稍后....10分钟无响应操作失败')
                         if datetime.datetime.now() >= masterEndTime:
-                            msg = "k8s master角色部署失败--5分钟没有完成.请升级机器配置或者检查原因"
+                            msg = "k8s master角色部署失败--10分钟没有完成.请升级机器配置或者检查原因,该阶段程序终止"
                             return JsonResponse({"code": 1, "msg": msg})
             else:
                 msg = "master角色部署Api操作异常请进行检查....."
                 return JsonResponse({"code": 1, "msg": msg})
-        return JsonResponse({"code": 1, "msg": "断点调试k8s 角色部署"})
+
+            resultCniData = k8s_instance.k8sDeployNetworkMain(cni_name)
+            if resultCniData.get("code") == 0 and resultCniData.get("task_id"):
+               msg = '''k8s 网络Cni插件部署成功.插件使用{cni_name}'''.format(cni_name=cni_name)
+               print({"code": 0, "msg": msg})
+            return JsonResponse({"code": 0, "msg": "k8s v1.23.5 cluster deploy success", "status":"true" })
         if deploy == 3:
             """
             # 安装node(deploy：3为node节点)
             """
-            k8s_instance.k8sDeployNodeMain()
-        return JsonResponse(data)
+            print("node环境部署中......")
+            nodeEndTime = datetime.datetime.now() + datetime.timedelta(minutes=3)
+            resultNodeTaskId = k8s_instance.k8sDeployNodeMain()
+            print(resultNodeTaskId)
+            if resultNodeTaskId.get("code") == 0 and resultNodeTaskId.get("task_id"):
+                while True:
+                    resultNodeCeleryStatus = k8s_instance.getIdMain(resultNodeTaskId.get("task_id"))
+                    if resultNodeCeleryStatus['code'] == 0:
+                        print('k8s node添加节点.....', resultNodeCeleryStatus)
+                        return JsonResponse({"code": 1, "msg": "k8s node添加节点成功","status":"true"})
+                    else:
+                        print('k8s k8s node添加节点还在处理中-循环查询状态中请稍后....3分钟无响应操作失败')
+                        if datetime.datetime.now() >= nodeEndTime:
+                            msg = "k8s k8s node添加节点失败--3分钟没有完成.请升级机器配置或者检查原因,该阶段程序终止"
+                            return JsonResponse({"code": 1, "msg": msg})
     else:
         return JsonResponse(kmc_Response(methodResponseMsg))

@@ -27,7 +27,7 @@ def aliDockerMirror():
 
 # 安装docker服务
 def yumDocker():
-    cmd = "sudo yum -y install docker-ce"
+    cmd = "sudo  yum-complete-transaction --cleanup-only;sudo rpm -qa |grep docker |xargs rpm -e;sudo yum -y install docker-ce"
     return cmd
 
 

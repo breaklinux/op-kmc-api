@@ -94,7 +94,7 @@ def setNtp():
 
 # 路由转发
 def iptablesBridge():
-    cmd = "sudo echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.d/k8s.conf;sudo echo 'net.bridge.bridge-nf-call-ip6tables = 1' >> /etc/sysctl.d/k8s.conf;sudo echo 'net.bridge.bridge-nf-call-iptables = 1' >> /etc/sysctl.d/k8s.conf"
+    cmd = "sudo echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.d/k8s.conf;sudo echo 'net.bridge.bridge-nf-call-iptables = 1' >> /etc/sysctl.d/k8s.conf;sudo echo 'net.bridge.bridge-nf-call-ip6tables = 1'>>/etc/sysctl.d/k8s.conf; sudo sysctl -p"
     return cmd
 
 
@@ -108,10 +108,12 @@ modprobe -- ip_vs_rr
 modprobe -- ip_vs_wrr
 modprobe -- ip_vs_sh
 modprobe -- nf_conntrack
+modprobe -- br_netfilter
 EOF
     sudo /bin/bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack
     echo "/bin/bash /etc/sysconfig/modules/ipvs.modules" >>/etc/rc.local
     '''
+
     return cmd
 
 

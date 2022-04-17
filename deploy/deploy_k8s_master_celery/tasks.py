@@ -9,21 +9,24 @@ base = os.path.join(HOME_DIR, "base")
 os.sys.path.append(script_path)
 os.sys.path.append(base)
 from .main import app
-from datetime_tools import runTime, runTimeCalculate
 from ssh_channel import sshChannelManager
 from deploy.views import k8sDeployCluster
 
 
 # 安装kubeadm、kubelet、kubectl，并设置开机自启
 def yumKube():
-    cmd = "sudo yum install -y kubelet-1.23.5-0 kubeadm-1.23.5-0 kubectl-1.23.5-0;sudo systemctl enable kubelet.service"
+    cmd = "sudo rpm -qa |grep -E 'kubelet|kubeadm|kubectl|kubernetes-cni'|xargs rpm -e; sudo yum install -y kubelet-1.23.5-0 kubeadm-1.23.5-0 kubectl-1.23.5-0;sudo systemctl enable kubelet.service"
     return cmd
 
+# 清理现有规则
+def cleanK8SRole():
+    cmd = "sudo yes|kubeadm reset; sudo rm -rf /etc/cni/net.d; sudo iptables -F; sudo iptables -X ;sudo rm -f $HOME/.kube/config; sudo rm -f ~/kube-init.log"
+    return cmd
 
 # kubeadm init 初始化(只有第一次部署master需要，需要参数deploy:1)，ip为kubeapi的地址
 def kubeInit(ip):
     cmd = "sudo kubeadm init --v=5 --apiserver-advertise-address=" + str(
-        ip) + " --image-repository registry.aliyuncs.com/google_containers --kubernetes-version v1.23.5 --service-cidr=10.1.0.0/16 --pod-network-cidr=10.244.0.0/16 > ~/kube-init.log"
+        ip) + " --image-repository registry.aliyuncs.com/google_containers --kubernetes-version v1.23.5 --service-cidr=10.1.0.0/16 --pod-network-cidr=10.244.0.0/16 >> ~/kube-init.log"
     return cmd
 
 
@@ -46,7 +49,6 @@ def saveTokenFile(kube_join_cmd):
         dataList = [kube_join_cmd]
         csv_write.writerow(dataList)
 
-
 # 拷贝pki文件
 def pki():
     pass
@@ -64,22 +66,25 @@ def joinMasterCluster():
 
 # 安装插件
 def cniPlugin():
-    cmd = "sudo kubectl --kubeconfig=//etc/kubernetes/admin.conf apply -f /tmp/*.yaml && sudo rm -f /tmp/*.yaml"
+    cmd = "sudo kubectl --kubeconfig=//etc/kubernetes/admin.conf apply -f /tmp/*.yaml"
     return cmd
 
 # 配置kubectl认证权限，使用
 def kubectlPermission():
-    cmd="mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config && echo 'kubectl add home success' "
+    cmd="mkdir -p $HOME/.kube && sudo yes|cp -rpf /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config && echo 'kubectl add home success' "
     return cmd
 
 
 
 @app.task(name='dp_k8sMaster')
-def dp_k8sMaster(host, port, username, password, advertise_address, deploy, cni_name):
+def dp_k8sMaster(host, port, username, password, advertise_address, deploy):
     print("master环境部署中......")
     ssh_remove_exec_cmd = sshChannelManager(host, port, username)
     cmd = yumKube()  # 部署
     ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+    cmd = cleanK8SRole() # 环境清理
+    ssh_remove_exec_cmd.sshExecCommand(cmd, password)
+
     if deploy == 1:
         try:
             cmd = kubeInit(advertise_address)  # 初始化
@@ -87,13 +92,10 @@ def dp_k8sMaster(host, port, username, password, advertise_address, deploy, cni_
             cmd = joinToken()  # 获取jointoken命令
             out = ssh_remove_exec_cmd.sshExecCommand(cmd, password)
             saveTokenFile(out)  # 存入本地
-            cniCmd = cniPlugin()  # 部署cni 走文件
-            ssh_remove_exec_cmd.sshExecCommand(cniCmd, password)
             cmd = kubectlPermission()  # 配置kubectl
             ssh_remove_exec_cmd.sshExecCommand(cmd, password)
             return {"code": 0, "message": "k8s master Init部署成功"}
         except Exception as e:
-            print(e)
             return {"code": 1, "message": "k8s master Init部署失败原因+{status}".format(status=str(e))}
 
     elif deploy == 2:

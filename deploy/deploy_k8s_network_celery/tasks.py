@@ -33,12 +33,12 @@ def dp_k8sNetwork(pluginName, host, port, username, passwd):
         scpChannel.remoteHostScp(passwd, local_path, remote_path)
         result = scpChannel.remoteHostScp(passwd, local_path, remote_path)
         print(result)
-        # if result.get("msg") == "success":
-        #     cmd = "kubectl apply -f {remote_filepath} ".format(remote_filepath=remote_path)
-        #     scpChannel.sshExecCommand(cmd, passwd)
-        #     print("执行文件")
-        # else:
-        #     return result.get("info")
+        if result.get("msg") == "success":
+            cmd = "kubectl apply -f {remote_filepath} ".format(remote_filepath=remote_path)
+            scpChannel.sshExecCommand(cmd, passwd)
+            print("执行文件")
+        else:
+            return result.get("info")
 
     else:
         local_path = script_path + "/cni_plugin_yaml/Calico/kube_calico.yam"
