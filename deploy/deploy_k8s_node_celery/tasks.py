@@ -32,10 +32,8 @@ def joinMasterCluster():
         cmd = ""
         for i in csv_reader:
             cmd += str(i)
-        print(i)
-        cmd = str(cmd).replace("[", "").replace("]", "").replace(",", ";").replace("'", "")
-        return cmd
-
+        cmd = str(cmd).replace("]", "").replace("[", "").replace("'", "").replace("\\\\", "").replace("\r\n\t", "").replace('\"',"")
+        return cmd.strip("'")
 
 # 传递token 和 认证信息
 def joinNodeToasterCluster(apiServerIp, token, caCertHash):

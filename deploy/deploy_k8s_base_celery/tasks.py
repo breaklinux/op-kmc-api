@@ -32,7 +32,7 @@ EOF
 
 # 防火墙、selinux
 def stopSecurity():
-    cmd = "sudo sed -i 's/enforcing/disabled/' /etc/selinux/config;sudo setenforce 0;sudo systemctl stop firewalld;sudo systemctl disable firewalld"
+    cmd = "sudo sed -i 's/enforcing/disabled/' /etc/selinux/config;sudo setenforce 0;sudo systemctl stop firewalld;sudo systemctl disable firewalld; sudo systemctl stop NetworkManager; sudo systemctl disable NetworkManager"
     return cmd
 
 
