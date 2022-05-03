@@ -61,12 +61,12 @@ def joinMasterCluster():
         cmd = ""
         for i in csv_reader:
             cmd += str(i)
-        cmd = str(cmd).replace("[", "").replace("]", "").replace(",", ";").replace("'", "").replace("\"", "") + " --control-plane"
-        return cmd
+        cmd = str(cmd).replace("]", "").replace("[", "").replace("'", "").replace("\\\\", "").replace("\r\n\t", "").replace('\"',"") + " --control-plane"
+        return cmd.strip("'")
 
 # 安装插件
 def cniPlugin():
-    cmd = "sudo kubectl --kubeconfig=//etc/kubernetes/admin.conf apply -f /tmp/*.yaml"
+    cmd = "sudo kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /tmp/*.yaml"
     return cmd
 
 # 配置kubectl认证权限，使用

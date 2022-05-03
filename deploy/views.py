@@ -182,10 +182,10 @@ def k8sDeploy(request):
                 while True:
                     resultDockerCeleryStatus = k8s_instance.getIdMain(resultDockerTaskId.get("task_id"))
                     if resultDockerCeleryStatus['code'] == 0:
-                        print('k8s Docker环境部署成功--下一步进行Master Init', resultDockerCeleryStatus)
+                        print('k8s Docker环境部署中--下一步进行Master Init', resultDockerCeleryStatus)
                         break
                     else:
-                        print('k8s  Docker环境部署成功-循环查询状态中请稍后....10分钟无响应操作失败')
+                        print('k8s  Docker环境部署中-循环查询状态中请稍后....10分钟无响应操作失败')
                         if datetime.datetime.now() >= dockerEndTime:
                             msg = "k8s Docker环境部失败--10分钟没有完成.请升级机器配置或者检查具体原因"
                             return JsonResponse({"code": 1, "msg": msg})

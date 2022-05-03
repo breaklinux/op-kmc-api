@@ -1,2 +1,0 @@
-['kubeadm join 192.168.1.201:6443 --token 70knwx.gcmx6odk94fz1byw \
---discovery-token-ca-cert-hash sha256:d25ed2c6eee33a005e566b636c61d135f9fb82558be634e76acddb85775e6bf4']

@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
 from pathlib import Path
-
+import re
 # Celery settings
 CELERY_BROKER_URL = 'redis://192.168.1.202:6379/14'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -46,9 +46,34 @@ DEPLOY_OS_UPGRADE_API = "http://0.0.0.0/os_upgrade"
 DEPLOY_DOCKER_API = "http://0.0.0.0/deploy_docker"
 DEPLOY_K8S_NETWORK_API = "http://0.0.0.0/k8s_cni"
 
-
+"""
+1.ldap 
+"""
+LDAP = {
+    "server": "192.168.1.11",
+    "port": 389,
+    "use_ssl": False,
+    "domain": "ops.com",
+    "base": "ou=user,dc=ops,dc=com",
+    "admin_dc": "cn=admin,dc=ops,dc=com",
+    "admin_passwd": "Ldap#1234"
+}
 
 # Application definition
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'dj_ops_kmc',
+        'USER': 'root',
+        'HOST': '192.168.1.11',
+        'PASSWORD': '123456',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+        },
+    }
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -57,9 +82,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'deploy.deploy_kernel_upgrade_celery',
-    'deploy.deploy_docker_service_celery'
+    'account.apps.AuthLoginConfig'
 ]
+
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -70,14 +96,17 @@ CACHES = {
         },
     },
 }
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'libs.middleware.AuthenticationMiddleware',
+    'libs.middleware.HandleExceptionMiddleware'
 ]
 
 ROOT_URLCONF = 'kmc.urls'
@@ -101,20 +130,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'kmc.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
-# DATABASES = {
-#     'default' : {
-#         'ENGINE':'django.db.backends.mysql',
-#         'NAME':'kmc',
-#         'USER':'root',
-#         'PASSWORD':'hang3458.',
-#         'HOST':'192.168.89.133',
-#         'PORT':3306,
-#     }
-# }
 
 
 # Password validation
@@ -147,6 +162,13 @@ USE_I18N = True
 
 USE_TZ = True
 
+# 不包括 middleware 接口
+
+AUTHENTICATION_EXCLUDES = (
+    '/account/login/',
+    re.compile('/apis/.*'),
+)
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -157,3 +179,62 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'formatters': {
+#         'standard': {
+#             'format': '%(asctime)s [%(threadName)s:%(thread)d] [%(name)s:%(lineno)d] [%(module)s:%(funcName)s] [%(levelname)s]- %(message)s'}
+#     },
+#     'filters': {
+#         'require_debug_false': {
+#             '()': 'django.utils.log.RequireDebugFalse',
+#         }
+#     },
+#     'handlers': {
+#         'null': {
+#             'level': 'DEBUG',
+#             'class': 'logging.NullHandler',
+#         },
+#         'mail_admins': {
+#             'level': 'ERROR',
+#             'class': 'django.utils.log.AdminEmailHandler',
+#             'filters': ['require_debug_false'],  # 仅当 DEBUG = False 时才发送邮件
+#             'include_html': True,
+#         },
+#         'debug': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': os.path.join(BASE_DIR, "logs", ''
+#                                                        ''
+#                                                        ''),  # 日志输出文件
+#             'maxBytes': 1024 * 1024 * 5,  # 文件大小
+#             'backupCount': 5,  # 备份份数
+#             'formatter': 'standard',  # 使用哪种formatters日志格式
+#         },
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'standard',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': False
+#         },
+#         'django.request': {
+#             'handlers': ['debug', 'mail_admins'],
+#             'level': 'ERROR',
+#             'propagate': True,
+#         },
+#
+#         'django.security.DisallowedHost': {
+#             'handlers': ['null'],
+#             'propagate': False,
+#         },
+#     }
+# }
