@@ -1,0 +1,4 @@
+kubeadm join 192.168.1.201:6443 --token i79bgs.nvzkefr3f3s1ze71 \
+--discovery-token-ca-cert-hash sha256:d25ed2c6eee33a005e566b636c61d135f9fb82558be634e76acddb85775e6bf4  --control-plane \
+--certificate-key 0107088334f42de3ea89068696ecb5e2d20f92ae4f5aae49dde8ab7a5aab42ca
+

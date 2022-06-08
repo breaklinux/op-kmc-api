@@ -50,14 +50,16 @@ DEPLOY_K8S_NETWORK_API = "http://0.0.0.0/k8s_cni"
 1.ldap 
 """
 LDAP = {
-    "server": "192.168.1.11",
+    "server": "127.0.0.1",
     "port": 389,
     "use_ssl": False,
     "domain": "ops.com",
-    "base": "ou=user,dc=ops,dc=com",
+    "base": "dc=ops,dc=com",
     "admin_dc": "cn=admin,dc=ops,dc=com",
-    "admin_passwd": "Ldap#1234"
+    "admin_passwd": "ldap#123",
+    "rules": "cn"
 }
+
 
 # Application definition
 DATABASES = {
@@ -101,7 +103,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -165,7 +167,7 @@ USE_TZ = True
 # 不包括 middleware 接口
 
 AUTHENTICATION_EXCLUDES = (
-    '/account/login/',
+    '/account/login/api/v1/',
     re.compile('/apis/.*'),
 )
 

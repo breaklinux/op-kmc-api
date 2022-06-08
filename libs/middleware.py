@@ -22,6 +22,7 @@ class AuthenticationMiddleware(MiddlewareMixin):
     """
 
     def process_request(self, request):
+        print(request.headers)
         if request.path in settings.AUTHENTICATION_EXCLUDES:
             return None
         access_token = request.headers.get('x-token') or request.GET.get('x-token')

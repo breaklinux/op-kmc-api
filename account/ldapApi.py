@@ -5,7 +5,7 @@ from ldap3 import ALL_ATTRIBUTES
 import uuid
 import random
 from django.conf import settings
-
+import ldap
 LDAP = settings.LDAP
 
 class MyLdapOps(object):
@@ -61,6 +61,7 @@ class MyLdapOps(object):
         try:
             user = f"cn={username},{self.base}"
             conn = self.ldapConnect(user, password)
+            print(conn.result.get("result"))
             if conn.result.get("result") == 0 and conn.result.get("description") == "success":
                 return {"code": 0, "message": "LDAP登陆验证成功", "data": conn.result.get("description"), "user": username,"status": True}
             else:
@@ -122,3 +123,31 @@ class MyLdapOps(object):
             return {"code": 0, "message": "删除成功", "username": username, "status": True}
         else:
             return {"code": 1, "message": "删除失败", "username": username,  "status": False}
+
+class newLdap:
+    def __init__(self):
+        self.server = LDAP.get("server")
+        self.port = LDAP.get("port")
+        self.rules = LDAP.get("rules")
+        self.admin_dn = LDAP.get("admin_dc")
+        self.password = LDAP.get("admin_passwd")
+        self.base_dn = LDAP.get("base")
+
+    def valid_user(self, username, password):
+        try:
+            conn = ldap.initialize("ldap://{0}:{1}".format(self.server, self.port), bytes_mode=False)
+            conn.simple_bind_s(self.admin_dn, self.password)
+            search_filter = f'({self.rules}={username})'
+            ldap_result_id = conn.search(self.base_dn, ldap.SCOPE_SUBTREE, search_filter, None)
+            result_type, result_data = conn.result(ldap_result_id, 0)
+            if result_type == ldap.RES_SEARCH_ENTRY:
+                conn.simple_bind_s(result_data[0][0], password)
+                return {"code": 0, "message": "LDAP登陆验证成功", "user": username, "status": True }
+            else:
+                err_msg = 'LDAP 认证失败,请检查账号名称或者密码'
+                return {"code": 1, "message": err_msg,  "user": username, "status": False}
+                # return False, None
+        except Exception as error:
+            args = error.args
+            print(args)
+            return {"code": 1, "message": '未知错误', "data": str(args), "user": username, "status": False}
