@@ -28,7 +28,7 @@ class dj_ldap_user(BaseModel):
     username = models.CharField(max_length=128, verbose_name="用户名称")
     user_id = models.CharField(max_length=32, verbose_name="用户id")
     token = models.CharField(max_length=3096, verbose_name="用户token")
-
+    token_expired = models.CharField(max_length=64, verbose_name="用户token过期时间")
 
     class Meta:
         db_table = "ldap_user"

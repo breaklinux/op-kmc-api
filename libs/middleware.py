@@ -26,6 +26,7 @@ class AuthenticationMiddleware(MiddlewareMixin):
         if request.path in settings.AUTHENTICATION_EXCLUDES:
             return None
         access_token = request.headers.get('x-token') or request.GET.get('x-token')
+        print(access_token)
         if access_token:
             x_real_ip = get_request_real_ip(request.headers)
             user = User.objects.filter(token=access_token).first()

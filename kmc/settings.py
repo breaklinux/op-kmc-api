@@ -61,6 +61,7 @@ LDAP = {
 }
 
 
+
 # Application definition
 DATABASES = {
     'default': {
